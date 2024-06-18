@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import concurrent.futures
+from collections import defaultdict
 
 API_KEY = st.secrets["API_KEY"]
 
@@ -170,21 +171,21 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     return results
 
 
-def process_coa(external_coa_file,jaz_import_file):
-    external_coa_data = pd.read_csv(external_coa_file)
-    jaz_coa_data=pd.read_excel(jaz_import_file,sheet_name=1)
+def process_coa(external_coa, jaz_import_file):
+    external_coa_data = pd.read_csv(external_coa)
+    jaz_coa_data = pd.read_excel(jaz_import_file, sheet_name=1)
     st.write(external_coa_data, "COA")
     st.write(external_coa_data.columns, "COLS")
     external_account_names = external_coa_data['*Name'].tolist()
     st.write(external_account_names, "ACNAMES")
-    st.write("jaz template",jaz_coa_data)
+    st.write("jaz template", jaz_coa_data)
     #account_types = classify_account_types(account_names)
     #trial_balance_cleaned['Account Type'] = account_types
     #combined_accounts = [f"{name} - {type}" for name, type in zip(account_names, account_types)]  ############
     combined_accounts = [f"{name} " for name in external_account_names]
 
-    jaz_account_names=[f"{name} " for name in jaz_coa_data['Name*'].tolist()]
-    st.write("JAN",jaz_account_names)
+    jaz_account_names = [f"{name} " for name in jaz_coa_data['Name*'].tolist()]
+    st.write("JAN", jaz_account_names)
     sga_matches = recommend_sga_match(jaz_account_names, combined_accounts)
     ###############
     external_coa_data['SGA Match Recommendation'] = sga_matches
@@ -202,12 +203,41 @@ def convert_df_to_csv(df):
 
 
 st.title('Jaz COA Import Mapping Tool (SG-EN)')
-
 external_coa_file = st.file_uploader("Choose the external coa file", type=["csv"])
 jaz_coa_file = st.file_uploader("Choose the jaz coa import file", type=["xlsx"])
 if external_coa_file is not None and jaz_coa_file is not None:
     #st.write("print_sga prompt", sga_prompt)
-    processed_data = process_coa(external_coa_file,jaz_coa_file)
+    external_coa_data = pd.read_csv(external_coa_file)
+    jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
+    coa_map = defaultdict(dict)
+    for j in range(len(jaz_coa_data)):
+        row = jaz_coa_data.iloc[j]
+        account_name = row['Name*']
+        account_type = row['Account Type*']
+        code = row['Code']
+        description = row['Description']
+        lock_date = row['Lock Date']
+        unique_id = ['Unique ID (do not edit)']
+        coa_map[account_name] = {
+            "Account Type*": account_type,
+            "Name*": account_name,
+            "Code": code,
+            "Description": description,
+            "Lock Date": lock_date,
+            "Unique ID (do not edit)": unique_id
+        }
+
+    for i in range(len(external_coa_data)):
+        row = external_coa_data.iloc[i]
+        if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
+            continue
+        else:
+            if row['jaz_sga_name'] in coa_map:
+                coa_map[row['jaz_sga_name']]['Code'] = row['*Code']
+                coa_map[row['jaz_sga_name']]['Description'] = row['Description']
+                coa_map[row['jaz_sga_name']]['MATch'] = True
+    st.write("GOAT",coa_map)
+    processed_data = process_coa(external_coa_file, jaz_coa_file)
     st.write("Processed Data", processed_data)
     csv = convert_df_to_csv(processed_data)
     st.download_button(
