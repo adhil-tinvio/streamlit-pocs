@@ -147,7 +147,7 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
             "model": "gpt-4-turbo",
             "messages": messages,
             "temperature": 0.5,
-            "max_tokens": 1000
+            "max_tokens": 2000
         }
 
         try:
