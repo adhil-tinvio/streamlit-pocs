@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import requests
-import requests
 import concurrent.futures
 
 API_KEY = st.secrets["API_KEY"]
@@ -176,9 +175,10 @@ def process_trial_balance(file):
     trial_balance_cleaned = trial_balance_cleaned[:-1]
 
     account_names = trial_balance_cleaned['Account Name'].tolist()
-    account_types = classify_account_types(account_names)
-    trial_balance_cleaned['Account Type'] = account_types
-    combined_accounts = [f"{name} - {type}" for name, type in zip(account_names, account_types)]  ############
+    #account_types = classify_account_types(account_names)
+    #trial_balance_cleaned['Account Type'] = account_types
+    #combined_accounts = [f"{name} - {type}" for name, type in zip(account_names, account_types)]  ############
+    combined_accounts=[f"{name} " for name in account_names]
 
     sga_matches = recommend_sga_match(combined_accounts)  ###############
     trial_balance_cleaned['SGA Match Recommendation'] = sga_matches
@@ -195,11 +195,12 @@ def convert_df_to_csv(df):
     return df.to_csv(index=False).encode('utf-8')
 
 
-st.title('Trial Balance to COA Mapping Tool')
+st.title('Jaz COA Import Mapping Tool (SG-EN)')
 
-uploaded_file = st.file_uploader("Choose a file")
-if uploaded_file is not None:
-    processed_data = process_trial_balance(uploaded_file)
+external_file = st.file_uploader("Choose the external coa file")
+jaz_coa_file = st.file_uploader("Choose the jaz coa import file")
+if external_file is not None and jaz_coa_file is not None:
+    processed_data = process_trial_balance(external_file)
     st.write("Processed Data", processed_data)
     csv = convert_df_to_csv(processed_data)
     st.download_button(
