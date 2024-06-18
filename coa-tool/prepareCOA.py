@@ -113,7 +113,7 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa
             jaz_coa_name = sga_matches[i]
             ext_coa_name = external_coa_account_names[i]
             mapped_coa_names.add(ext_coa_name)
-            filtered_df = external_coa[(ext_coa_name['*Name'] == ext_coa_name)]
+            filtered_df = external_coa[ext_coa_name['*Name'] == ext_coa_name]
             st.write("filtered df length", len(filtered_df), ext_coa_name, filtered_df)
             rowz = filtered_df[0]
             chart_of_accounts_map[jaz_coa_name]['Code'] = rowz['*Code']
