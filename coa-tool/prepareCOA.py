@@ -170,20 +170,21 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     return results
 
 
-def process_trial_balance(file):
-    external_coa_data = pd.read_csv(file)
+def process_coa(external_coa_file,jaz_import_file):
+    external_coa_data = pd.read_csv(external_coa_file)
+    jaz_coa_data=pd.read_excel(jaz_import_file)
     st.write(external_coa_data, "COA")
     st.write(external_coa_data.columns, "COLS")
-    account_names = external_coa_data['*Name'].tolist()
-    st.write(account_names, "ACNAMES")
-
+    external_account_names = external_coa_data['*Name'].tolist()
+    st.write(external_account_names, "ACNAMES")
+    st.write("jaz template",jaz_coa_data)
     #account_types = classify_account_types(account_names)
     #trial_balance_cleaned['Account Type'] = account_types
     #combined_accounts = [f"{name} - {type}" for name, type in zip(account_names, account_types)]  ############
-    combined_accounts = [f"{name} " for name in account_names]
+    combined_accounts = [f"{name} " for name in external_account_names]
 
-    coa_names = ["A"]
-    sga_matches = recommend_sga_match(coa_names, combined_accounts)
+    jaz_account_names=[f"{name} " for name in jaz_coa_data['Name*'].tolist()]
+    sga_matches = recommend_sga_match(jaz_account_names, combined_accounts)
     ###############
     external_coa_data['SGA Match Recommendation'] = sga_matches
 
@@ -201,11 +202,11 @@ def convert_df_to_csv(df):
 
 st.title('Jaz COA Import Mapping Tool (SG-EN)')
 
-external_file = st.file_uploader("Choose the external coa file", type=["csv"])
+external_coa_file = st.file_uploader("Choose the external coa file", type=["csv"])
 jaz_coa_file = st.file_uploader("Choose the jaz coa import file", type=["xlsx"])
-if external_file is not None and jaz_coa_file is not None:
+if external_coa_file is not None and jaz_coa_file is not None:
     #st.write("print_sga prompt", sga_prompt)
-    processed_data = process_trial_balance(external_file)
+    processed_data = process_coa(external_coa_file,jaz_coa_file)
     st.write("Processed Data", processed_data)
     csv = convert_df_to_csv(processed_data)
     st.download_button(
