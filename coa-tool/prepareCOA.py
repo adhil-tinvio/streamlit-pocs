@@ -58,7 +58,8 @@ def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
     You are a skilled financial analyst.
     Match the given account names with the most suitable account from the Chart of Accounts given to you.
-    The matches should be 1:1, meaning each account name from the list must be paired uniquely with one account from the COA.
+    The matches should be 1:1, meaning 
+    each account name from the list must be paired uniquely with one account from the Chart of Accounts and vice versa.
     Below is the list of available Chart of Accounts:
     """ + "\n- " + "\n- ".join(chart_of_accounts) + "\n"
 
