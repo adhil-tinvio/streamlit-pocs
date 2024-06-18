@@ -123,13 +123,13 @@ def classify_account_types(account_names, batch_size=15):
     return results
 
 
-def recommend_sga_match(coa_names,account_names, batch_size=15):
+def recommend_sga_match(coa_names, account_names, batch_size=15):
     headers = {
         'Authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json',
     }
     results = [None] * len(account_names)
-    sga_prompt=sga_prompt_generator(coa_names)
+    sga_prompt = sga_prompt_generator(coa_names)
 
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(account_names))
@@ -182,8 +182,9 @@ def process_trial_balance(file):
     #combined_accounts = [f"{name} - {type}" for name, type in zip(account_names, account_types)]  ############
     combined_accounts = [f"{name} " for name in account_names]
 
-    coa_names=["A"]
-    sga_matches = recommend_sga_match(coa_names,combined_accounts)  ###############
+    coa_names = ["A"]
+    sga_matches = recommend_sga_match(coa_names, combined_accounts)
+    ###############
     external_coa_data['SGA Match Recommendation'] = sga_matches
 
     external_coa_data['Status'] = 'Active'
@@ -203,7 +204,7 @@ st.title('Jaz COA Import Mapping Tool (SG-EN)')
 external_file = st.file_uploader("Choose the external coa file", type=["csv"])
 jaz_coa_file = st.file_uploader("Choose the jaz coa import file", type=["xlsx"])
 if external_file is not None and jaz_coa_file is not None:
-    st.write("print_sga prompt", sga_prompt)
+    #st.write("print_sga prompt", sga_prompt)
     processed_data = process_trial_balance(external_file)
     st.write("Processed Data", processed_data)
     csv = convert_df_to_csv(processed_data)
