@@ -171,22 +171,23 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     return results
 
 
-def process_coa(external_coa, jaz_import_file):
-    external_coa_data = pd.read_csv(external_coa)
-    jaz_coa_data = pd.read_excel(jaz_import_file, sheet_name=1)
-    st.write(external_coa_data, "COA")
-    st.write(external_coa_data.columns, "COLS")
-    external_account_names = external_coa_data['*Name'].tolist()
-    st.write(external_account_names, "ACNAMES")
-    st.write("jaz template", jaz_coa_data)
-    #account_types = classify_account_types(account_names)
-    #trial_balance_cleaned['Account Type'] = account_types
-    #combined_accounts = [f"{name} - {type}" for name, type in zip(account_names, account_types)]  ############
-    combined_accounts = [f"{name} " for name in external_account_names]
-
-    jaz_account_names = [f"{name} " for name in jaz_coa_data['Name*'].tolist()]
+def match_coa_using_gpt(external_coa_file, jaz_coa_file, chart_of_accounts_map):
+    st.write(external_coa_file, "COA")
+    st.write(external_coa_file.columns, "COLS")
+    external_coa_account_names = external_coa_file['*Name'].tolist()
+    st.write(external_coa_account_names, "ACNAMES")
+    st.write("jaz template", jaz_coa_file)
+    jazz_an = []
+    for name in jaz_coa_file['Name*'].tolist():
+        if 'Match' in chart_of_accounts_map[name]:
+            continue
+        else:
+            jazz_an.append(name)
+    combined_accounts = [f"{name} " for name in external_coa_account_names if name not in chart_of_accounts_map]
+    jaz_account_names = [f"{name} " for name in jazz_an]
     st.write("JAN", jaz_account_names)
     sga_matches = recommend_sga_match(jaz_account_names, combined_accounts)
+    st.write("SGA_matches",sga_matches)
     ###############
     external_coa_data['SGA Match Recommendation'] = sga_matches
 
@@ -224,7 +225,8 @@ if external_coa_file is not None and jaz_coa_file is not None:
             "Code": code,
             "Description": description,
             "Lock Date": lock_date,
-            "Unique ID (do not edit)": unique_id
+            "Unique ID (do not edit)": unique_id,
+            "Match": False
         }
 
     for i in range(len(external_coa_data)):
@@ -235,9 +237,10 @@ if external_coa_file is not None and jaz_coa_file is not None:
             if row['jaz_sga_name'] in coa_map:
                 coa_map[row['jaz_sga_name']]['Code'] = row['*Code']
                 coa_map[row['jaz_sga_name']]['Description'] = row['Description']
-                coa_map[row['jaz_sga_name']]['MATch'] = True
-    st.write("GOAT",coa_map)
-    processed_data = process_coa(external_coa_file, jaz_coa_file)
+                coa_map[row['jaz_sga_name']]['Match'] = True
+                coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
+    st.write("GOAT", coa_map)
+    processed_data = match_coa_using_gpt(external_coa_file, jaz_coa_file, coa_map)
     st.write("Processed Data", processed_data)
     csv = convert_df_to_csv(processed_data)
     st.download_button(
