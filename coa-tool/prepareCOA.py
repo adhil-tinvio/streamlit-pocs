@@ -147,7 +147,7 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
             "model": "gpt-4-turbo",
             "messages": messages,
             "temperature": 0.5,
-            "max_tokens": 2000
+            "max_tokens": 1000
         }
 
         try:
@@ -193,7 +193,7 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map):
     combined_accounts = [f"{name} " for name in external_coa_account_names]
     jaz_account_names = [f"{name} " for name in jazz_an]
     st.write("JAN", jaz_account_names)
-    sga_matches = recommend_sga_match(jaz_account_names, combined_accounts,100)
+    sga_matches = recommend_sga_match(jaz_account_names, combined_accounts, 15)
     st.write("SGA_matches", sga_matches)
     st.write("len sga matches", len(sga_matches), len(external_coa_account_names), len(combined_accounts))
     ###############
