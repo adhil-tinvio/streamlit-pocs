@@ -22,6 +22,7 @@ def sga_prompt_generator(chart_of_accounts):
     4) Please do not give them index numbers at all.
     5) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
     6) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
+    7) the account types when matched should not be conflciting
     """
 
     return sga_prompt
@@ -82,7 +83,7 @@ def recommend_sga_match(coa_names, account_names,account_types, batch_size=15):
 def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa_names):
     st.write(external_coa, "COA")
     st.write(external_coa.columns, "COLS")
-    unmapped_external_coa=external_coa[(external_coa['*Name'] not in mapped_coa_names)]
+    unmapped_external_coa=external_coa[~(external_coa['*Name'].isin(mapped_coa_names))]
     external_coa_account_names = [name for name in unmapped_external_coa]
     st.write(external_coa_account_names, "ACNAMES")
     st.write("jaz template", jaz_coa)
