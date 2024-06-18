@@ -240,7 +240,7 @@ if external_coa_file is not None and jaz_coa_file is not None:
                 coa_map[row['jaz_sga_name']]['Match'] = True
                 coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
     st.write("GOAT", coa_map)
-    processed_data = match_coa_using_gpt(external_coa_file, jaz_coa_file, coa_map)
+    processed_data = match_coa_using_gpt(external_coa_data, jaz_coa_data, coa_map)
     st.write("Processed Data", processed_data)
     csv = convert_df_to_csv(processed_data)
     st.download_button(
