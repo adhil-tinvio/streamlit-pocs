@@ -63,7 +63,7 @@ def sga_prompt_generator(chart_of_accounts):
 
     sga_prompt += """
     1) If there is no close match, name it 'No Suitable Match'.
-    2) The matches should be 1:1, meaning account name from the list must be paired uniquely with one account from the Chart of Accounts and vice versa (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY ENTRY)
+    2) The matches must be 1:1, meaning each account name from the list must be paired uniquely with one account from the COA and vice versa. This is very important.
     3) If there are 15 bank accounts given in a batch, you must return exactly 15 mapped account types (meaning 15 values returned, even if all 15 are no suitable match), Including No Suitable Match. This is so that the format will not get messed up. 
     4) Please do not give them index numbers at all.
     5) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
@@ -193,7 +193,7 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map):
     combined_accounts = [f"{name} " for name in external_coa_account_names]
     jaz_account_names = [f"{name} " for name in jazz_an]
     st.write("JAN", jaz_account_names)
-    sga_matches = recommend_sga_match(jaz_account_names, combined_accounts)
+    sga_matches = recommend_sga_match(jaz_account_names, combined_accounts,100)
     st.write("SGA_matches", sga_matches)
     st.write("len sga matches", len(sga_matches), len(external_coa_account_names), len(combined_accounts))
     ###############
