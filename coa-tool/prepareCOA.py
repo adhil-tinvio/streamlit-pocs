@@ -131,6 +131,7 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     }
     results = [None] * len(account_names)
     sga_prompt = sga_prompt_generator(coa_names)
+    st.write("COa nems",coa_names)
     st.write("SGA prompt",sga_prompt)
     st.write("account names",account_names)
 
