@@ -46,7 +46,7 @@ def recommend_sga_match(coa_names, account_names,account_types, batch_size=15):
         c_at=account_types[start_index:end_index]
         messages = [{'role': 'system', 'content': sga_prompt}]
         for t in range(len(c_an)):
-            messages.append({'role': 'user', 'content': f"Account Type: {c_at[t]} - Account Name:{c_an[t]}"})
+            messages.append({'role': 'user', 'content': f"Account Name: {c_an[t]} - Account Type:{c_at[t]}"})
 
         data = {
             "model": "gpt-4-turbo",
