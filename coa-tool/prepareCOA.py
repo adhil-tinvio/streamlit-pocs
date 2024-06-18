@@ -165,7 +165,7 @@ def recommend_sga_match(account_names, batch_size=15):
 
 def process_trial_balance(file):
     external_coa_data = pd.read_csv(file)
-    print(external_coa_data,"external coa data")
+    st.write(external_coa_data,"COA")
     account_names = external_coa_data['Account Name'].tolist()
     #account_types = classify_account_types(account_names)
     #trial_balance_cleaned['Account Type'] = account_types
