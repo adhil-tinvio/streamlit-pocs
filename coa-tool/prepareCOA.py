@@ -127,6 +127,7 @@ def recommend_sga_match(account_names, batch_size=15):
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(account_names))
         batch = account_names[start_index:end_index]
+        st.write("print_sga prompt",sga_prompt)
         messages = [{'role': 'system', 'content': sga_prompt}]
         for name in batch:
             messages.append({'role': 'user', 'content': f"TB Account: {name}"})
