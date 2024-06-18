@@ -183,7 +183,7 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map):
     jazz_an = []
     st.write("jaz_ans",jaz_coa['Name*'].tolist())
     for name in jaz_coa['Name*'].tolist():
-        if 'Match' in chart_of_accounts_map[name]:
+        if chart_of_accounts_map[name]['Match']:
             continue
         else:
             jazz_an.append(name)
