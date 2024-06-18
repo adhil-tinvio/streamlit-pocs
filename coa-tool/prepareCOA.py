@@ -174,14 +174,15 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     return results
 
 
-def match_coa_using_gpt(external_coa_file, jaz_coa_file, chart_of_accounts_map):
-    st.write(external_coa_file, "COA")
-    st.write(external_coa_file.columns, "COLS")
-    external_coa_account_names = external_coa_file['*Name'].tolist()
+def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map):
+    st.write(external_coa, "COA")
+    st.write(external_coa.columns, "COLS")
+    external_coa_account_names = external_coa['*Name'].tolist()
     st.write(external_coa_account_names, "ACNAMES")
-    st.write("jaz template", jaz_coa_file)
+    st.write("jaz template", jaz_coa)
     jazz_an = []
-    for name in jaz_coa_file['Name*'].tolist():
+    st.write("jaz_ans",jaz_coa['Name*'].tolist())
+    for name in jaz_coa['Name*'].tolist():
         if 'Match' in chart_of_accounts_map[name]:
             continue
         else:
