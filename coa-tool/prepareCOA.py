@@ -195,7 +195,7 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map):
     st.write("SGA_matches",sga_matches)
     st.write("len sga matches",len(sga_matches),len(external_coa_account_names))
     ###############
-    external_coa_data=external_coa[(external_coa if external_coa)]
+    #external_coa_data=external_coa[(external_coa if external_coa)]
     external_coa_data['SGA Match Recommendation'] = sga_matches
 
     external_coa_data['Status'] = 'Active'
