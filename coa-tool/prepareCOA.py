@@ -91,8 +91,8 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa
     jazz_at= []
     st.write("jaz_ans", jaz_coa['Name*'].tolist())
     for i in range(len(jaz_coa)):
-        name=row.iloc[i]['Name*']
-        ac_type=row.iloc[i]['Account Type*']
+        name=jaz_coa.iloc[i]['Name*']
+        ac_type=jaz_coa.iloc[i]['Account Type*']
         if chart_of_accounts_map[name]['Match']:
             continue
         else:
