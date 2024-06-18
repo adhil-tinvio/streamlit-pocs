@@ -131,9 +131,9 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     }
     results = [None] * len(account_names)
     sga_prompt = sga_prompt_generator(coa_names)
-    st.write("COa nems",coa_names)
-    st.write("SGA prompt",sga_prompt)
-    st.write("account names",account_names)
+    st.write("COa nems", coa_names)
+    st.write("SGA prompt", sga_prompt)
+    st.write("account names", account_names)
 
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(account_names))
@@ -178,22 +178,23 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map):
     st.write(external_coa, "COA")
     st.write(external_coa.columns, "COLS")
     external_coa_account_names = external_coa['*Name'].tolist()
+    external_coa_account_names = [name for name in external_coa_account_names if name not in chart_of_accounts_map]
     st.write(external_coa_account_names, "ACNAMES")
     st.write("jaz template", jaz_coa)
     jazz_an = []
-    st.write("jaz_ans",jaz_coa['Name*'].tolist())
+    st.write("jaz_ans", jaz_coa['Name*'].tolist())
     for name in jaz_coa['Name*'].tolist():
         if chart_of_accounts_map[name]['Match']:
             continue
         else:
             jazz_an.append(name)
-    st.write("jax an ",jazz_an)
-    combined_accounts = [f"{name} " for name in external_coa_account_names if name not in chart_of_accounts_map]
+    st.write("jax an ", jazz_an)
+    combined_accounts = [f"{name} " for name in external_coa_account_names]
     jaz_account_names = [f"{name} " for name in jazz_an]
     st.write("JAN", jaz_account_names)
     sga_matches = recommend_sga_match(jaz_account_names, combined_accounts)
-    st.write("SGA_matches",sga_matches)
-    st.write("len sga matches",len(sga_matches),len(jazz_an),len(combined_accounts))
+    st.write("SGA_matches", sga_matches)
+    st.write("len sga matches", len(sga_matches), len(external_coa_account_names), len(combined_accounts))
     ###############
     #external_coa_data=external_coa[(external_coa if external_coa)]
     external_coa_data['SGA Match Recommendation'] = sga_matches
