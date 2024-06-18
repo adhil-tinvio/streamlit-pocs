@@ -165,18 +165,7 @@ def recommend_sga_match(account_names, batch_size=15):
 
 def process_trial_balance(file):
     external_coa_data = pd.read_csv(file)
-    '''
-        trial_balance_cleaned = trial_balance_data.iloc[4:].dropna(axis=1, how='all')
-    trial_balance_cleaned.columns = ['Account', 'Debit', 'Credit']
-    trial_balance_cleaned[['Account Code', 'Account Name']] = trial_balance_cleaned['Account'].str.extract(
-        r'(?:(\d+(?:\.\d+)*)\s+)?(.*)')
-    trial_balance_cleaned = trial_balance_cleaned.drop(columns=['Account'])
-    # trial_balance_cleaned = trial_balance_cleaned.dropna(subset=['Account Code', 'Account Name'])
-    trial_balance_cleaned = trial_balance_cleaned.dropna(subset=['Account Name'])
-    trial_balance_cleaned = trial_balance_cleaned[:-1]
-    
-    '''
-
+    print(external_coa_data,"external coa data")
     account_names = external_coa_data['Account Name'].tolist()
     #account_types = classify_account_types(account_names)
     #trial_balance_cleaned['Account Type'] = account_types
