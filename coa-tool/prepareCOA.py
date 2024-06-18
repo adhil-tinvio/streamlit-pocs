@@ -63,7 +63,7 @@ def sga_prompt_generator(chart_of_accounts):
 
     sga_prompt += """
     1) If there is no close match, name it 'No Suitable Match'.
-    2) The matches should be 1:1, meaning account name from the list must be paired uniquely with one account from the Chart of Accounts and vice versa.
+    2) The matches should be 1:1, meaning account name from the list must be paired uniquely with one account from the Chart of Accounts and vice versa (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY ENTRY)
     3) If there are 15 bank accounts given in a batch, you must return exactly 15 mapped account types (meaning 15 values returned, even if all 15 are no suitable match), Including No Suitable Match. This is so that the format will not get messed up. 
     4) Please do not give them index numbers at all.
     5) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
