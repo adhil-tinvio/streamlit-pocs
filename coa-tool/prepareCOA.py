@@ -131,13 +131,15 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     }
     results = [None] * len(account_names)
     sga_prompt = sga_prompt_generator(coa_names)
+    st.write("SGA prompt",sga_prompt)
+    st.write("account names",account_names)
 
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(account_names))
         batch = account_names[start_index:end_index]
         messages = [{'role': 'system', 'content': sga_prompt}]
         for name in batch:
-            messages.append({'role': 'user', 'content': f"TB Account: {name}"})
+            messages.append({'role': 'user', 'content': f"Account Name: {name}"})
 
         data = {
             "model": "gpt-4-turbo",
