@@ -58,6 +58,7 @@ def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
     You are a skilled financial analyst.
     Match the given account names with the most suitable account from the Chart of Accounts given to you.
+    the matches should be 1:1.
     Below is the list of available Chart of Accounts:
     """ + "\n- " + "\n- ".join(chart_of_accounts) + "\n"
 
@@ -67,7 +68,6 @@ def sga_prompt_generator(chart_of_accounts):
     3) Please do not give them index numbers at all.
     4) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
     5) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
-    6) Please make sure you dont match the same Chart of account name against multiple input accounts VERY IMPORTANT
     """
 
     return sga_prompt
