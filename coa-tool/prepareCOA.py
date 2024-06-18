@@ -127,7 +127,6 @@ def recommend_sga_match(account_names, batch_size=15):
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(account_names))
         batch = account_names[start_index:end_index]
-        st.write("print_sga prompt",sga_prompt)
         messages = [{'role': 'system', 'content': sga_prompt}]
         for name in batch:
             messages.append({'role': 'user', 'content': f"TB Account: {name}"})
@@ -196,6 +195,7 @@ st.title('Jaz COA Import Mapping Tool (SG-EN)')
 external_file = st.file_uploader("Choose the external coa file", type=["csv"])
 jaz_coa_file = st.file_uploader("Choose the jaz coa import file", type=["xlsx"])
 if external_file is not None and jaz_coa_file is not None:
+    st.write("print_sga prompt",sga_prompt)
     processed_data = process_trial_balance(external_file)
     st.write("Processed Data", processed_data)
     csv = convert_df_to_csv(processed_data)
