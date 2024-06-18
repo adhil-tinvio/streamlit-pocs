@@ -184,6 +184,7 @@ def process_coa(external_coa_file,jaz_import_file):
     combined_accounts = [f"{name} " for name in external_account_names]
 
     jaz_account_names=[f"{name} " for name in jaz_coa_data['Name*'].tolist()]
+    st.write("JAN",jaz_account_names)
     sga_matches = recommend_sga_match(jaz_account_names, combined_accounts)
     ###############
     external_coa_data['SGA Match Recommendation'] = sga_matches
