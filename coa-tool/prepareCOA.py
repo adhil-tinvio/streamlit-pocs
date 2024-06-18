@@ -164,8 +164,9 @@ def recommend_sga_match(account_names, batch_size=15):
 
 
 def process_trial_balance(file):
-    trial_balance_data = pd.read_excel(file)
-    trial_balance_cleaned = trial_balance_data.iloc[4:].dropna(axis=1, how='all')
+    external_coa_data = pd.read_csv(file)
+    '''
+        trial_balance_cleaned = trial_balance_data.iloc[4:].dropna(axis=1, how='all')
     trial_balance_cleaned.columns = ['Account', 'Debit', 'Credit']
     trial_balance_cleaned[['Account Code', 'Account Name']] = trial_balance_cleaned['Account'].str.extract(
         r'(?:(\d+(?:\.\d+)*)\s+)?(.*)')
@@ -173,20 +174,22 @@ def process_trial_balance(file):
     # trial_balance_cleaned = trial_balance_cleaned.dropna(subset=['Account Code', 'Account Name'])
     trial_balance_cleaned = trial_balance_cleaned.dropna(subset=['Account Name'])
     trial_balance_cleaned = trial_balance_cleaned[:-1]
+    
+    '''
 
-    account_names = trial_balance_cleaned['Account Name'].tolist()
+    account_names = external_coa_data['Account Name'].tolist()
     #account_types = classify_account_types(account_names)
     #trial_balance_cleaned['Account Type'] = account_types
     #combined_accounts = [f"{name} - {type}" for name, type in zip(account_names, account_types)]  ############
     combined_accounts = [f"{name} " for name in account_names]
 
     sga_matches = recommend_sga_match(combined_accounts)  ###############
-    trial_balance_cleaned['SGA Match Recommendation'] = sga_matches
+    external_coa_data['SGA Match Recommendation'] = sga_matches
 
-    trial_balance_cleaned['Status'] = 'Active'
-    trial_balance_cleaned['Unique ID'] = ''
+    external_coa_data['Status'] = 'Active'
+    external_coa_data['Unique ID'] = ''
 
-    final_data = trial_balance_cleaned[
+    final_data = external_coa_data[
         ['Account Type', 'Account Name', 'Account Code', 'Status', 'Unique ID', 'SGA Match Recommendation']]
     return final_data
 
