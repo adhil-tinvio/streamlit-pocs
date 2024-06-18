@@ -6,59 +6,13 @@ from collections import defaultdict
 
 API_KEY = st.secrets["API_KEY"]
 
-prompt = f"""
-You are a skilled accountant. 
-Determine the closest matching account type for each account below. 
-If there is no matching type, name it 'Not an Account type'. 
-
-The possible types are:
-1. Asset - Bank Accounts
-2. Asset - Cash
-3. Asset - Current Asset
-4. Asset - Fixed Asset
-5. Asset - Inventory
-6. Asset - Non-current Asset
-7. Equity - Shareholders Equity
-8. Expense - Direct Costs
-9. Expense - Operating Expense
-10. Expense - Other Expense
-11. Liability - Current Liability
-12. Liability - Non-current Liability
-13. Revenue - Operating Revenue
-14. Revenue - Other Revenue
-
-For each bank account, return only mapped account type.
-An example of the format is within the three backticks:
-```
-Expense - Operating Expense
-Expense - Other Expense
-Expense - Direct Costs
-# Add more if there are more than 3 bank accounts given. 
-```
-Do not add additional words. If there are 15 bank accounts given, you must return exactly 15 mapped account types. 
-"""
-
-"""
-sga_chart_of_accounts = [
-    "Accounts Payable", "Accounts Receivable",
-    "Business Bank Account", "Cash on Hand", "Cost of Goods Sold", "Creditable Withholding Tax",
-    "Deferred Input VAT Receivable", "Deferred Output VAT Payable", "Depreciation Expense",
-    "FX Bank Revaluation (Gains)/Loss", "FX Realized Currency (Gains)/Loss",
-    "FX Rounding (Gains)/Loss", "FX Unrealized Currency (Gains)/Loss", "Income Tax Expense",
-    "Input VAT Receivable", "Inventory", "Loans Payable", "Output VAT Payable",
-    "Property, Plant, Equipment", "Rent Expense", "Repair & Maintenance Expense",
-    "Retained Earnings", "Salary & Payroll Expense", "Sales Revenue",
-    "Selling, General & Administrative Expense", "Shipping Expense", "Shipping Revenue",
-    "Transaction Fees & Charges", "Utility Expense", "Withholding Tax Payable"
-]
-"""
-
 
 def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
     You are a skilled financial analyst.
     Match the given account names with the most suitable account from the Chart of Accounts given to you.
-    Below is the list of available Chart of Accounts:
+    Below is the list of available Chart of Accounts in the format account type - account name:
+    the input will also be similiar account type and name
     """ + "\n- " + "\n- ".join(chart_of_accounts) + "\n"
 
     sga_prompt += """
@@ -73,59 +27,7 @@ def sga_prompt_generator(chart_of_accounts):
     return sga_prompt
 
 
-def classify_account_types(account_names, batch_size=15):
-    headers = {
-        'Authorization': f'Bearer {API_KEY}',
-        'Content-Type': 'application/json',
-    }
-    results = [None] * len(account_names)
-
-    def process_batch(start_index):
-        end_index = min(start_index + batch_size, len(account_names))
-        batch = account_names[start_index:end_index]
-        messages = [{
-            'role': 'system',
-            'content': prompt
-        }]
-        for name in batch:
-            messages.append({
-                'role': 'user',
-                'content': f"Account name: {name}"
-            })
-
-        data = {
-            "model": "gpt-4-turbo",
-            "messages": messages,
-            "temperature": 0.5,
-            "max_tokens": 1000
-        }
-
-        try:
-            response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
-            response.raise_for_status()
-            response_json = response.json()
-            content = response_json['choices'][0]['message']['content']
-            content = content.strip("```").strip()
-            batch_results = [line.strip() for line in content.split('\n')]
-
-            if len(batch_results) != len(batch):
-                print("batch: ", batch)
-                print("batch results: ", batch_results)
-                raise ValueError(f"Expected {len(batch)} results, but got {len(batch_results)}")
-        except (requests.exceptions.RequestException, ValueError, IndexError) as e:
-            print(f"Error processing batch: {e}")
-            batch_results = ["Error in classification"] * len(batch)
-
-        results[start_index:end_index] = batch_results
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        indices = range(0, len(account_names), batch_size)
-        executor.map(process_batch, indices)
-
-    return results
-
-
-def recommend_sga_match(coa_names, account_names, batch_size=15):
+def recommend_sga_match(coa_names, account_names,account_types, batch_size=15):
     headers = {
         'Authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json',
@@ -134,14 +36,16 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     sga_prompt = sga_prompt_generator(coa_names)
     st.write("COa nems", coa_names)
     st.write("SGA prompt", sga_prompt)
-    st.write("account names", account_names)
+    st.write("account details", account_names,account_types)
 
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(account_names))
-        batch = account_names[start_index:end_index]
+        #batch = account_details[start_index:end_index]
+        c_an=account_names[start_index:end_index]
+        c_at=account_types[start_index:end_index]
         messages = [{'role': 'system', 'content': sga_prompt}]
-        for name in batch:
-            messages.append({'role': 'user', 'content': f"Account Name: {name}"})
+        for t in range(len(c_an)):
+            messages.append({'role': 'user', 'content': f"Account Type: {c_at[t]} - Account Name:{c_an[t]}"})
 
         data = {
             "model": "gpt-4-turbo",
@@ -158,13 +62,13 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
             content = content.strip("```").strip()
             batch_results = [line.strip() for line in content.split('\n') if line.strip()]
 
-            if len(batch_results) != len(batch):
-                print("batch: ", batch)
+            if len(batch_results) != len(c_an):
+                print("batch: ", c_an)
                 print("batch results: ", batch_results)
-                raise ValueError(f"Expected {len(batch)} results, but got {len(batch_results)}")
+                raise ValueError(f"Expected {len(c_an)} results, but got {len(batch_results)}")
         except (requests.exceptions.RequestException, ValueError, IndexError) as e:
             print(f"Error processing batch: {e}")
-            batch_results = ["Error in classification"] * len(batch)
+            batch_results = ["Error in classification"] * len(c_an)
 
         results[start_index:end_index] = batch_results
 
@@ -175,37 +79,47 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
     return results
 
 
-def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map):
+def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa_names):
     st.write(external_coa, "COA")
     st.write(external_coa.columns, "COLS")
-    external_coa_account_names = external_coa['*Name'].tolist()
-    external_coa_account_names = [name for name in external_coa_account_names if name not in chart_of_accounts_map]
+    unmapped_external_coa=external_coa[(external_coa['*Name'] not in mapped_coa_names)]
+    external_coa_account_names = [name for name in unmapped_external_coa]
     st.write(external_coa_account_names, "ACNAMES")
     st.write("jaz template", jaz_coa)
     jazz_an = []
+    jazz_at= []
     st.write("jaz_ans", jaz_coa['Name*'].tolist())
-    for name in jaz_coa['Name*'].tolist():
+    for i in range(len(jaz_coa)):
+        name=row.iloc[i]['Name*']
+        ac_type=row.iloc[i]['Account Type*']
         if chart_of_accounts_map[name]['Match']:
             continue
         else:
             jazz_an.append(name)
+            jazz_at.append(ac_type)
     st.write("jax an ", jazz_an)
-    combined_accounts = [f"{name} " for name in external_coa_account_names]
-    jaz_account_names = [f"{name} " for name in jazz_an]
-    st.write("JAN", jaz_account_names)
-    sga_matches = recommend_sga_match(jaz_account_names, combined_accounts, 15)
+    #combined_accounts = [f"{name} " for name in external_coa_account_names]
+    ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
+    ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
+    combined_accounts = [f"{name} - {acnt_type}" for name, acnt_type in zip(ext_coa_account_names, ext_coa_account_types)]
+    jaz_accounts = [f"{name} - {ac_type}" for name,ac_type in zip(jazz_an, jazz_at)]
+    st.write("JAN", jaz_accounts)
+    sga_matches = recommend_sga_match(jaz_accounts, ext_coa_account_names,ext_coa_account_types, 15)
     st.write("SGA_matches", sga_matches)
     st.write("len sga matches", len(sga_matches), len(external_coa_account_names), len(combined_accounts))
-    ###############
-    #external_coa_data=external_coa[(external_coa if external_coa)]
-    external_coa_data['SGA Match Recommendation'] = sga_matches
-
-    external_coa_data['Status'] = 'Active'
-    external_coa_data['Unique ID'] = ''
-
-    final_data = external_coa_data[
-        ['*Type', '*Name', '*Code', 'Status', 'Unique ID', 'SGA Match Recommendation']]
-    return final_data
+    for i in range(len(sga_matches)):
+        if sga_matches[i] != 'No Suitable Match':
+            jaz_coa_name = sga_matches[i]
+            ext_coa_name = external_coa_account_names[i]
+            mapped_coa_names.add(ext_coa_name)
+            filtered_df = external_coa[[ext_coa_name['*Name']] == ext_coa_name]
+            st.write("filtered df length", len(filtered_df), ext_coa_name, filtered_df)
+            rowz = filtered_df[0]
+            chart_of_accounts_map[jaz_coa_name]['Code'] = rowz['*Code']
+            chart_of_accounts_map[jaz_coa_name]['Description'] = rowz['Description']
+            chart_of_accounts_map[jaz_coa_name]['Match'] = True
+            chart_of_accounts_map[jaz_coa_name]['Status'] = 'ACTIVE'
+    return chart_of_accounts_map, mapped_coa_names
 
 
 def convert_df_to_csv(df):
@@ -220,6 +134,7 @@ if external_coa_file is not None and jaz_coa_file is not None:
     external_coa_data = pd.read_csv(external_coa_file)
     jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
     coa_map = defaultdict(dict)
+    mapped_external_coa_names = set()
     for j in range(len(jaz_coa_data)):
         row = jaz_coa_data.iloc[j]
         account_name = row['Name*']
@@ -235,7 +150,8 @@ if external_coa_file is not None and jaz_coa_file is not None:
             "Description": description,
             "Lock Date": lock_date,
             "Unique ID (do not edit)": unique_id,
-            "Match": False
+            "Match": False,
+            "Status": "INACTIVE"
         }
 
     for i in range(len(external_coa_data)):
@@ -248,10 +164,34 @@ if external_coa_file is not None and jaz_coa_file is not None:
                 coa_map[row['jaz_sga_name']]['Description'] = row['Description']
                 coa_map[row['jaz_sga_name']]['Match'] = True
                 coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
+                mapped_external_coa_names.add(row['*Name'])
     st.write("GOAT", coa_map)
-    processed_data = match_coa_using_gpt(external_coa_data, jaz_coa_data, coa_map)
-    st.write("Processed Data", processed_data)
-    csv = convert_df_to_csv(processed_data)
+    coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, coa_map,
+                                                             mapped_external_coa_names)
+    st.write("Processed Data", coa_map)
+    for p in range(len(external_coa_data)):
+        row = external_coa_data.iloc[p]
+        if row['*Name'] not in mapped_external_coa_names:
+            account_name = row['*Name']
+            account_type = row['*Type']
+            code = row['*Code']
+            description = row['Description']
+            lock_date = row['Lock Date']
+            unique_id = ""
+            coa_map[account_name] = {
+                "Account Type*": account_type,
+                "Name*": account_name,
+                "Code": code,
+                "Description": description,
+                "Lock Date": lock_date,
+                "Unique ID (do not edit)": unique_id,
+                "Match": False,
+                "Status": "ACTIVE"
+            }
+    f_df = pd.DataFrame.from_dict(coa_map, orient='index')
+    # Reset the index to move the outer dictionary keys to a column
+    f_df.reset_index(drop=True, inplace=True)
+    csv = convert_df_to_csv(f_df)
     st.download_button(
         label="Download data as CSV",
         data=csv,
