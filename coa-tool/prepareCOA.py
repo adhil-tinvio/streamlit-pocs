@@ -11,12 +11,12 @@ def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
     You are a skilled financial analyst.
     Match the given account names with the most suitable account from the Chart of Accounts given to you.
-    Below is the list of available Chart of Accounts in the format account type - account name:
-    the input will also be similiar account type and name
+    Below is the list of available Chart of Accounts in the format Account Name - Account Type:
+    the input will also be similar format Account Name - Account Type
     """ + "\n- " + "\n- ".join(chart_of_accounts) + "\n"
 
     sga_prompt += """
-    1) If there is no close match, name it 'No Suitable Match'.
+    1) Return only Account Name as response,If there is no close match, name it 'No Suitable Match'.
     2) The matches must be 1:1, meaning each account name from the list must be paired uniquely with one account from the COA and vice versa. This is very important.
     3) If there are 15 bank accounts given in a batch, you must return exactly 15 mapped account types (meaning 15 values returned, even if all 15 are no suitable match), Including No Suitable Match. This is so that the format will not get messed up. 
     4) Please do not give them index numbers at all.
