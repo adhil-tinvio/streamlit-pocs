@@ -186,6 +186,7 @@ def match_coa_using_gpt(external_coa_file, jaz_coa_file, chart_of_accounts_map):
             continue
         else:
             jazz_an.append(name)
+    st.write("jax an ",jazz_an)
     combined_accounts = [f"{name} " for name in external_coa_account_names if name not in chart_of_accounts_map]
     jaz_account_names = [f"{name} " for name in jazz_an]
     st.write("JAN", jaz_account_names)
