@@ -172,7 +172,7 @@ def recommend_sga_match(coa_names, account_names, batch_size=15):
 
 def process_coa(external_coa_file,jaz_import_file):
     external_coa_data = pd.read_csv(external_coa_file)
-    jaz_coa_data=pd.read_excel(jaz_import_file)
+    jaz_coa_data=pd.read_excel(jaz_import_file,sheet_name=1)
     st.write(external_coa_data, "COA")
     st.write(external_coa_data.columns, "COLS")
     external_account_names = external_coa_data['*Name'].tolist()
