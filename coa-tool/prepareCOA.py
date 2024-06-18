@@ -178,7 +178,7 @@ def process_trial_balance(file):
     #account_types = classify_account_types(account_names)
     #trial_balance_cleaned['Account Type'] = account_types
     #combined_accounts = [f"{name} - {type}" for name, type in zip(account_names, account_types)]  ############
-    combined_accounts=[f"{name} " for name in account_names]
+    combined_accounts = [f"{name} " for name in account_names]
 
     sga_matches = recommend_sga_match(combined_accounts)  ###############
     trial_balance_cleaned['SGA Match Recommendation'] = sga_matches
@@ -197,8 +197,8 @@ def convert_df_to_csv(df):
 
 st.title('Jaz COA Import Mapping Tool (SG-EN)')
 
-external_file = st.file_uploader("Choose the external coa file")
-jaz_coa_file = st.file_uploader("Choose the jaz coa import file")
+external_file = st.file_uploader("Choose the external coa file", type=["csv"])
+jaz_coa_file = st.file_uploader("Choose the jaz coa import file", type=["xlsx"])
 if external_file is not None and jaz_coa_file is not None:
     processed_data = process_trial_balance(external_file)
     st.write("Processed Data", processed_data)
