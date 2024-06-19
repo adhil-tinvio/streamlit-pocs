@@ -136,13 +136,13 @@ def convert_df_to_csv(df):
 
 
 def run_process():
-    st.markdown("<div style='text-align: center; font-size: 50px; font-weight: bold;'>"
+    st.markdown("<div style='text-align: center; font-size: 45px; font-weight: bold;'>"
                 "Jaz COA Import Mapping Tool (SG-EN)</div>",
                 unsafe_allow_html=True)
     st.write("")
     st.markdown("""
             <div style='text-align: center; margin-bottom: 20px;'>
-                <h1 style='font-size: 20px; font-weight: bold;'>Please upload External COA File</h1>
+                <h1 style='font-size: 15px; font-weight: bold;'>Please upload External COA File</h1>
             </div>
         """, unsafe_allow_html=True)
     st.write("")
@@ -151,7 +151,7 @@ def run_process():
     st.write("")
     st.markdown("""
             <div style='text-align: center; margin-bottom: 20px;'>
-                <h1 style='font-size: 20px; font-weight: bold;'>Please upload JAZ COA Import File</h1>
+                <h1 style='font-size: 15px; font-weight: bold;'>Please upload JAZ COA Import File</h1>
             </div>
         """, unsafe_allow_html=True)
     jaz_coa_file = st.file_uploader("",type=["xlsx"])
