@@ -273,7 +273,7 @@ def run_process():
         st.markdown(instructions, unsafe_allow_html=True)
         st.write("")
         st.write("")
-        col1, col2, col3 = st.columns([15, 10, 15])
+        col1, col2, col3 = st.columns([17, 10, 15])
         with col2:
             st.download_button(
                 label="Download File",
