@@ -118,7 +118,7 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa
             filtered_df = external_coa[external_coa['*Name'] == ext_coa_name]
             st.write("filtered df length", len(filtered_df), ext_coa_name, filtered_df)
             if len(filtered_df)>0:
-                rowz = filtered_df[0]
+                rowz = filtered_df.iloc[0]
                 chart_of_accounts_map[jaz_coa_name]['Code'] = rowz['*Code']
                 chart_of_accounts_map[jaz_coa_name]['Description'] = rowz['Description']
                 chart_of_accounts_map[jaz_coa_name]['Match'] = True
