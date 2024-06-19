@@ -263,14 +263,16 @@ def run_process():
         <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
             <div>
                 <h2 style="text-align: center;">Instructions:</h2>
-                <p><strong>1. Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
-                <p><strong>2. Upload the file to the correct Jaz organization account.</strong></p>
+                <p style="margin: 5px 0;"><strong>1. Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
+                <p style="margin: 5px 0;"><strong>2. Upload the file to the correct Jaz organization account.</strong></p>
             </div>
         </div>
         """
 
         # Display the instructions using Streamlit with HTML for center alignment
         st.markdown(instructions, unsafe_allow_html=True)
+        st.write("")
+        st.write("")
         col1, col2, col3 = st.columns([15, 10, 15])
         with col2:
             st.download_button(
