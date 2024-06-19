@@ -83,12 +83,10 @@ external_account_type_mappings = {
 def get_account_type_mapping(external_account_type):
     for key, value in external_account_type_mappings.items():
         if fuzz.ratio(key, external_account_type) > 95:
-            st.write("E")
             return value
 
     for key, value in jaz_account_type_mappings.items():
         if fuzz.ratio(key, external_account_type) > 95:
-            st.write("J")
             return value
     return f'Not Mapped: {external_account_type}'
 
