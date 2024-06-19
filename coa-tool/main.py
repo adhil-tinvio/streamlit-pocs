@@ -282,6 +282,7 @@ def run_process():
         external_coa_report_codes = external_coa_data['Report Code'].tolist()
         external_coa_mapped_account_types = classify_account_types(external_coa_account_types,
                                                                    external_coa_report_codes, 15)
+        st.write(external_coa_account_types,external_coa_mapped_account_types,"OP")
         for i in range(len(external_coa_data)):
             if (external_coa_mapped_account_types[i] != ''
                     and external_coa_mapped_account_types[i] != 'Error in classification'):
