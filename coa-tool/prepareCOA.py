@@ -173,7 +173,6 @@ if external_coa_file is not None and jaz_coa_file is not None:
     st.write("GOAT", coa_map)
     coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, coa_map,
                                                              mapped_external_coa_names)
-    st.write("Processed Data", coa_map)
     for p in range(len(external_coa_data)):
         row = external_coa_data.iloc[p]
         if row['*Name'] not in mapped_external_coa_names:
@@ -193,6 +192,7 @@ if external_coa_file is not None and jaz_coa_file is not None:
                 "Match": False,
                 "Status": "ACTIVE"
             }
+    st.write("Processed Data final", coa_map)
     f_df = pd.DataFrame.from_dict(coa_map, orient='index')
     # Reset the index to move the outer dictionary keys to a column
     f_df.reset_index(drop=True, inplace=True)
