@@ -260,14 +260,16 @@ def run_process():
         final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
         instructions = """
-        <div style="display: flex; justify-content: center; align-items: center; text-align: center; height: 100%; font-size: 18px;">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
             <div>
-            <h2>Instructions:</h2>
-            <p>1. <strong>Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
-            <p>2. <strong>Upload the file to the correct Jaz organization account.</strong></p>
-                 </div>
+                <h2 style="text-align: center;">Instructions:</h2>
+                <p><strong>1. Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
+                <p><strong>2. Upload the file to the correct Jaz organization account.</strong></p>
             </div>
+        </div>
         """
+
+        # Display the instructions using Streamlit with HTML for center alignment
         st.markdown(instructions, unsafe_allow_html=True)
         col1, col2, col3 = st.columns([15, 10, 15])
         with col2:
