@@ -62,7 +62,7 @@ Criteria:
 1) Return only Accepted Account Type from the list above as response. If there is no close match,return ''.
 2) Please do not give them index numbers at all.
 3) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-4) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
+4) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT5
 """
 
 
