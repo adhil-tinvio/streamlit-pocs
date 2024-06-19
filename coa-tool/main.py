@@ -259,16 +259,15 @@ def run_process():
         final_df.reset_index(drop=True, inplace=True)
         final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
-        col1, col2, col3 = st.columns([15, 10, 15])
-        with col2:
-            instructions = """
+        instructions = """
                 ### Instructions:
                 
                 1. **Copy the spreadsheet data and replace the import file entry sheet.**
                 2. **Upload the file to the correct Jaz organization account.**
                 """
-            st.markdown(instructions)
-
+        st.markdown(instructions)
+        col1, col2, col3 = st.columns([15, 10, 15])
+        with col2:
             st.download_button(
                 label="Download File",
                 data=final_output_csv,
