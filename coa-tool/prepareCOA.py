@@ -108,18 +108,22 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa
     sga_matches = recommend_sga_match(jaz_accounts, ext_coa_account_names,ext_coa_account_types, 15)
     st.write("SGA_matches", sga_matches)
     st.write("len sga matches", len(sga_matches), len(external_coa_account_names), len(combined_accounts))
+    cnt=0
     for i in range(len(sga_matches)):
         if sga_matches[i] != 'No Suitable Match':
+            cnt+=1
             jaz_coa_name = sga_matches[i]
             ext_coa_name = external_coa_account_names[i]
             mapped_coa_names.add(ext_coa_name)
             filtered_df = external_coa[external_coa['*Name'] == ext_coa_name]
             st.write("filtered df length", len(filtered_df), ext_coa_name, filtered_df)
-            rowz = filtered_df[0]
-            chart_of_accounts_map[jaz_coa_name]['Code'] = rowz['*Code']
-            chart_of_accounts_map[jaz_coa_name]['Description'] = rowz['Description']
-            chart_of_accounts_map[jaz_coa_name]['Match'] = True
-            chart_of_accounts_map[jaz_coa_name]['Status'] = 'ACTIVE'
+            if len(filtered_df)>0:
+                rowz = filtered_df[0]
+                chart_of_accounts_map[jaz_coa_name]['Code'] = rowz['*Code']
+                chart_of_accounts_map[jaz_coa_name]['Description'] = rowz['Description']
+                chart_of_accounts_map[jaz_coa_name]['Match'] = True
+                chart_of_accounts_map[jaz_coa_name]['Status'] = 'ACTIVE'
+    st.write("final_Cnt",cnt)
     return chart_of_accounts_map, mapped_coa_names
 
 
