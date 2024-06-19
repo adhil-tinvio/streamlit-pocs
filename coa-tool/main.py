@@ -280,11 +280,13 @@ def run_process():
         external_coa_report_codes = external_coa_data['Report Code'].tolist()
         external_coa_mapped_account_types = classify_account_types(external_coa_account_types,
                                                                    external_coa_report_codes, 15)
+        st.write("B4",external_coa_data)
         st.write(external_coa_account_types,external_coa_mapped_account_types,"check")
         for i in range(len(external_coa_data)):
             if external_coa_mapped_account_types[i] != '':
                 external_coa_data.iloc[i]['*Type'] = external_coa_mapped_account_types[i]
 
+        st.write("AFter",external_coa_data)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
