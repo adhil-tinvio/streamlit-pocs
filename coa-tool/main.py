@@ -5,6 +5,16 @@ import concurrent.futures
 from collections import defaultdict
 
 API_KEY = st.secrets["API_KEY"]
+ACTIVE_ONLY_ACCOUNTS = ['FX Realized Currency (Gains)/Losses',
+                        'Input GST Receivable',
+                        'Accounts Payable'
+                        'FX Unrealized Currency (Gains)/Losses'
+                        'FX Bank Revaluation (Gains)/Losses'
+                        'Business Bank Account'
+                        'FX Rounding (Gains)/Losses'
+                        'Accounts Receivable'
+                        'Retained Earnings'
+                        'Output VAT Payable']
 
 
 def sga_prompt_generator(chart_of_accounts):
@@ -98,7 +108,8 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, chart_of_accounts_map, mapp
     st.write("jax an ", jaz_account_names)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
-    jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in zip(jaz_account_names, jaz_account_types)]
+    jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in
+                           zip(jaz_account_names, jaz_account_types)]
     st.write("JAN", jaz_account_details)
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
     st.write("SGA_matches", sga_matches)
@@ -188,17 +199,8 @@ def run_process():
                 }
 
         for key, value in jaz_coa_map.items():
-            if key in ['FX Realized Currency (Gains)/Losses',
-                       'Input GST Receivable',
-                       'Accounts Payable'
-                       'FX Unrealized Currency (Gains)/Losses'
-                       'FX Bank Revaluation (Gains)/Losses'
-                       'Business Bank Account'
-                       'FX Rounding (Gains)/Losses'
-                       'Accounts Receivable'
-                       'Retained Earnings'
-                       'Output VAT Payable'] and jaz_coa_map[key]['Status'] == 'INACTIVE':
-                st.write("incative active",key)
+            if key in ACTIVE_ONLY_ACCOUNTS and jaz_coa_map[key]['Status'] == 'INACTIVE':
+                st.write("inactive active", key)
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
         st.write("Processed Data final", jaz_coa_map)
@@ -213,5 +215,6 @@ def run_process():
             mime='text/csv',
         )
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     run_process()
