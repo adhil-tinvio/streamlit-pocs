@@ -33,6 +33,83 @@ COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
                             'Status',
                             'Unique ID (do not edit)']
 
+account_type_prompt = """
+You are a skilled accountant. 
+Determine the closest matching account type for each account below. 
+If there is no matching type, name it 'Not an Account type'. 
+
+The possible types are:
+1. Asset - Bank Accounts
+2. Asset - Cash
+3. Asset - Current Asset
+4. Asset - Fixed Asset
+5. Asset - Inventory
+6. Asset - Non-current Asset
+7. Equity - Shareholders Equity
+8. Expense - Direct Costs
+9. Expense - Operating Expense
+10. Expense - Other Expense
+11. Liability - Current Liability
+12. Liability - Non-current Liability
+13. Revenue - Operating Revenue
+14. Revenue - Other Revenue
+
+Criteria:
+1) Return only Account Type form the above as response,If there is no close match, name it 'No Suitable Account Type Match'.
+"""
+
+
+def classify_account_types(account_types, batch_size=15):
+    headers = {
+        'Authorization': f'Bearer {API_KEY}',
+        'Content-Type': 'application/json',
+    }
+    results = [None] * len(account_types)
+
+    def process_batch(start_index):
+        end_index = min(start_index + batch_size, len(account_types))
+        batch = account_types[start_index:end_index]
+        messages = [{
+            'role': 'system',
+            'content': account_type_prompt
+        }]
+        for account_type in batch:
+            messages.append({
+                'role': 'user',
+                'content': f"Account Type: {account_type}"
+            })
+
+        data = {
+            "model": "gpt-4-turbo",
+            "messages": messages,
+            "temperature": 0.5,
+            "max_tokens": 1000
+        }
+
+        try:
+            response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
+            response.raise_for_status()
+            response_json = response.json()
+            content = response_json['choices'][0]['message']['content']
+            content = content.strip("```").strip()
+            batch_results = [line.strip() for line in content.split('\n')]
+
+            if len(batch_results) != len(batch):
+                print("batch: ", batch)
+                print("batch results: ", batch_results)
+                raise ValueError(f"Expected {len(batch)} results, but got {len(batch_results)}")
+        except (requests.exceptions.RequestException, ValueError, IndexError) as e:
+            print(f"Error processing batch: {e}")
+            batch_results = ["Error in classification"] * len(batch)
+
+        results[start_index:end_index] = batch_results
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        indices = range(0, len(account_types), batch_size)
+        executor.map(process_batch, indices)
+
+    return results
+
 
 def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
@@ -191,6 +268,10 @@ def run_process():
             else:
                 if col in COLUMNS_WITHOUT_CURRENCY:
                     column_order.append(col)
+
+        external_coa_account_types = external_coa_data['*Type'].tolist()
+        output = classify_account_types(external_coa_account_types)
+        st.write(external_coa_account_types, output)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
