@@ -187,7 +187,6 @@ if external_coa_file is not None and jaz_coa_file is not None:
                 "Name*": account_name,
                 "Code": code,
                 "Description": description,
-                "Lock Date": lock_date,
                 "Unique ID (do not edit)": unique_id,
                 "Match": False,
                 "Status": "ACTIVE"
