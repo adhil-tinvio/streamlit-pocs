@@ -260,12 +260,15 @@ def run_process():
         final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
         instructions = """
-                ### Instructions:
-                
-                1. **Copy the spreadsheet data and replace the import file entry sheet.**
-                2. **Upload the file to the correct Jaz organization account.**
-                """
-        st.markdown(instructions)
+        <div style="display: flex; justify-content: center; align-items: center; text-align: center; height: 100%; font-size: 18px;">
+            <div>
+            <h2>Instructions:</h2>
+            <p>1. <strong>Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
+            <p>2. <strong>Upload the file to the correct Jaz organization account.</strong></p>
+                 </div>
+            </div>
+        """
+        st.markdown(instructions, unsafe_allow_html=True)
         col1, col2, col3 = st.columns([15, 10, 15])
         with col2:
             st.download_button(
