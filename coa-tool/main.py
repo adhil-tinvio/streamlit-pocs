@@ -175,6 +175,7 @@ def run_process():
         external_coa_data = pd.read_csv(external_coa_file)
         jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
         jaz_coa_df_columns = jaz_coa_data.columns
+        st.write("jACOADF",jaz_coa_df_columns)
         currency_flag = False
         if 'Currency*' in jaz_coa_df_columns:
             currency_flag = True
