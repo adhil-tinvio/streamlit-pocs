@@ -126,57 +126,23 @@ def convert_df_to_csv(df):
     return df.to_csv(index=False).encode('utf-8')
 
 
-st.title('Jaz COA Import Mapping Tool (SG-EN)')
-external_coa_file = st.file_uploader("Choose the external coa file", type=["csv"])
-jaz_coa_file = st.file_uploader("Choose the jaz coa import file", type=["xlsx"])
-if external_coa_file is not None and jaz_coa_file is not None:
-    external_coa_data = pd.read_csv(external_coa_file)
-    jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
-    jaz_coa_map = defaultdict(dict)
-    mapped_external_coa_names = set()
-    for j in range(len(jaz_coa_data)):
-        row = jaz_coa_data.iloc[j]
-        account_name = row['Name*']
-        account_type = row['Account Type*']
-        code = row['Code']
-        description = row['Description']
-        lock_date = row['Lock Date']
-        unique_id = row['Unique ID (do not edit)']
-        jaz_coa_map[account_name] = {
-            "Account Type*": account_type,
-            "Name*": account_name,
-            "Code": code,
-            "Description": description,
-            "Lock Date": lock_date,
-            "Unique ID (do not edit)": unique_id,
-            "Match": False,
-            "Status": "INACTIVE"
-        }
-
-    for i in range(len(external_coa_data)):
-        row = external_coa_data.iloc[i]
-        if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
-            continue
-        else:
-            if row['jaz_sga_name'] in jaz_coa_map:
-                jaz_coa_map[row['jaz_sga_name']]['Code'] = row['*Code']
-                jaz_coa_map[row['jaz_sga_name']]['Description'] = row['Description']
-                jaz_coa_map[row['jaz_sga_name']]['Match'] = True
-                jaz_coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
-                jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
-                mapped_external_coa_names.add(row['*Name'])
-    st.write("GOAT", jaz_coa_map)
-    jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
-                                                                 mapped_external_coa_names)
-    for p in range(len(external_coa_data)):
-        row = external_coa_data.iloc[p]
-        if row['*Name'] not in mapped_external_coa_names:
-            account_name = row['*Name']
-            account_type = row['*Type']
-            code = row['*Code']
+def run_process():
+    st.title('Jaz COA Import Mapping Tool (SG-EN)')
+    external_coa_file = st.file_uploader("Choose the external coa file", type=["csv"])
+    jaz_coa_file = st.file_uploader("Choose the jaz coa import file", type=["xlsx"])
+    if external_coa_file is not None and jaz_coa_file is not None:
+        external_coa_data = pd.read_csv(external_coa_file)
+        jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
+        jaz_coa_map = defaultdict(dict)
+        mapped_external_coa_names = set()
+        for j in range(len(jaz_coa_data)):
+            row = jaz_coa_data.iloc[j]
+            account_name = row['Name*']
+            account_type = row['Account Type*']
+            code = row['Code']
             description = row['Description']
-            lock_date = ""
-            unique_id = ""
+            lock_date = row['Lock Date']
+            unique_id = row['Unique ID (do not edit)']
             jaz_coa_map[account_name] = {
                 "Account Type*": account_type,
                 "Name*": account_name,
@@ -185,31 +151,69 @@ if external_coa_file is not None and jaz_coa_file is not None:
                 "Lock Date": lock_date,
                 "Unique ID (do not edit)": unique_id,
                 "Match": False,
-                "Status": "ACTIVE"
+                "Status": "INACTIVE"
             }
 
-    for key, value in jaz_coa_map.items():
-        if key in ['FX Realized Currency (Gains)/Losses',
-                   'Input GST Receivable',
-                   'Accounts Payable'
-                   'FX Unrealized Currency (Gains)/Losses'
-                   'FX Bank Revaluation (Gains)/Losses'
-                   'Business Bank Account'
-                   'FX Rounding (Gains)/Losses'
-                   'Accounts Receivable'
-                   'Retained Earnings'
-                   'Output VAT Payable'] and jaz_coa_map[key]['Status'] == 'INACTIVE':
-            st.write("incative active",key)
-            jaz_coa_map[key]['Status'] = 'ACTIVE'
+        for i in range(len(external_coa_data)):
+            row = external_coa_data.iloc[i]
+            if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
+                continue
+            else:
+                if row['jaz_sga_name'] in jaz_coa_map:
+                    jaz_coa_map[row['jaz_sga_name']]['Code'] = row['*Code']
+                    jaz_coa_map[row['jaz_sga_name']]['Description'] = row['Description']
+                    jaz_coa_map[row['jaz_sga_name']]['Match'] = True
+                    jaz_coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
+                    jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
+                    mapped_external_coa_names.add(row['*Name'])
+        st.write("GOAT", jaz_coa_map)
+        jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
+                                                                     mapped_external_coa_names)
+        for p in range(len(external_coa_data)):
+            row = external_coa_data.iloc[p]
+            if row['*Name'] not in mapped_external_coa_names:
+                account_name = row['*Name']
+                account_type = row['*Type']
+                code = row['*Code']
+                description = row['Description']
+                lock_date = ""
+                unique_id = ""
+                jaz_coa_map[account_name] = {
+                    "Account Type*": account_type,
+                    "Name*": account_name,
+                    "Code": code,
+                    "Description": description,
+                    "Lock Date": lock_date,
+                    "Unique ID (do not edit)": unique_id,
+                    "Match": False,
+                    "Status": "ACTIVE"
+                }
 
-    st.write("Processed Data final", jaz_coa_map)
-    f_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
-    # Reset the index to move the outer dictionary keys to a column
-    f_df.reset_index(drop=True, inplace=True)
-    csv = convert_df_to_csv(f_df)
-    st.download_button(
-        label="Download data as CSV",
-        data=csv,
-        file_name='mapped_coa.csv',
-        mime='text/csv',
-    )
+        for key, value in jaz_coa_map.items():
+            if key in ['FX Realized Currency (Gains)/Losses',
+                       'Input GST Receivable',
+                       'Accounts Payable'
+                       'FX Unrealized Currency (Gains)/Losses'
+                       'FX Bank Revaluation (Gains)/Losses'
+                       'Business Bank Account'
+                       'FX Rounding (Gains)/Losses'
+                       'Accounts Receivable'
+                       'Retained Earnings'
+                       'Output VAT Payable'] and jaz_coa_map[key]['Status'] == 'INACTIVE':
+                st.write("incative active",key)
+                jaz_coa_map[key]['Status'] = 'ACTIVE'
+
+        st.write("Processed Data final", jaz_coa_map)
+        f_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
+        # Reset the index to move the outer dictionary keys to a column
+        f_df.reset_index(drop=True, inplace=True)
+        csv = convert_df_to_csv(f_df)
+        st.download_button(
+            label="Download data as CSV",
+            data=csv,
+            file_name='mapped_coa.csv',
+            mime='text/csv',
+        )
+
+if __name__=='__main__':
+    run_process()
