@@ -6,13 +6,13 @@ from collections import defaultdict
 from fuzzywuzzy import fuzz
 
 API_KEY = st.secrets["API_KEY"]
-ACTIVE_ONLY_ACCOUNTS = ['FX Realized Currency (Gains)/Losses',
+ACTIVE_ONLY_ACCOUNTS = ['FX Realized Currency (Gains)/Loss',
                         'Input GST Receivable',
                         'Accounts Payable'
-                        'FX Unrealized Currency (Gains)/Losses'
-                        'FX Bank Revaluation (Gains)/Losses'
+                        'FX Unrealized Currency (Gains)/Loss'
+                        'FX Bank Revaluation (Gains)/Loss'
                         'Business Bank Account'
-                        'FX Rounding (Gains)/Losses'
+                        'FX Rounding (Gains)/Loss'
                         'Accounts Receivable'
                         'Retained Earnings'
                         'Output VAT Payable']
