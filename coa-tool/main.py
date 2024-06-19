@@ -223,16 +223,18 @@ def run_process():
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
         st.write("Processed Data final", jaz_coa_map)
-        f_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
+        final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         # Reset the index to move the outer dictionary keys to a column
-        f_df.reset_index(drop=True, inplace=True)
-        csv = convert_df_to_csv(f_df)
-        st.download_button(
-            label="Download data as CSV",
-            data=csv,
-            file_name='mapped_coa.csv',
-            mime='text/csv',
-        )
+        final_df.reset_index(drop=True, inplace=True)
+        final_output_csv = convert_df_to_csv(final_df)
+        col1, col2, col3 = st.columns([15, 10, 15])
+        with col2:
+            st.download_button(
+                label="Download data as CSV",
+                data=final_output_csv,
+                file_name='jaz_mapped_coa.csv',
+                mime='text/csv',
+            )
 
 
 if __name__ == '__main__':
