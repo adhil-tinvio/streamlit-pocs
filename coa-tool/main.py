@@ -62,7 +62,7 @@ Criteria:
 1) Return only Accepted Account Type from the list above as response. If there is no close match,return ''.
 2) Please do not give them index numbers at all.
 3) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-4) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT5
+4) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
 """
 
 
@@ -130,11 +130,10 @@ def sga_prompt_generator(chart_of_accounts):
     sga_prompt += """
     1) Return only Account Name as response,If there is no close match, name it 'No Suitable Match'.
     2) The matches must be 1:1, meaning each account name from the list must be paired uniquely with one account from the COA and vice versa. This is very important.
-    3) If there are 15 chart of accounts details given in a batch, you must return exactly 15 mapped account names (meaning 15 values returned, even if all 15 are no suitable match), Including No Suitable Match. This is so that the format will not get messed up. 
-    4) Please do not give them index numbers at all.
-    5) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-    6) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
-    7) the account types when matched should not be conflicting
+    3) Please do not give them index numbers at all.
+    4) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
+    5) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
+    6) the account types when matched should not be conflicting
     """
 
     return sga_prompt
