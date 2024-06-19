@@ -136,10 +136,22 @@ def convert_df_to_csv(df):
 
 
 def run_process():
-    st.markdown("<div style='display: inline-block;text-align: center; font-size: 45px;"
-                " font-weight: bold;white-space:nowrap;width: 100%;'>"
-                "Jaz COA Import Mapping Tool (SG-EN)</div>",
-                unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            text-align: center;
+            font-size: 45px;
+            font-weight: bold;
+        ">
+            Jaz COA Import Mapping Tool (SG-EN)
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.write("")
     st.write("")
