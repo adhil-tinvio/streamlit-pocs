@@ -66,7 +66,7 @@ Criteria:
 """
 
 
-def classify_account_types(account_types,report_codes, batch_size=15):
+def classify_account_types(account_types, report_codes, batch_size=15):
     headers = {
         'Authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json',
@@ -278,9 +278,13 @@ def run_process():
                     column_order.append(col)
 
         external_coa_account_types = external_coa_data['*Type'].tolist()
-        external_coa_report_codes =external_coa_data['Report Code'].tolist()
-        output = classify_account_types(external_coa_account_types,external_coa_report_codes,15)
-        st.write(external_coa_account_types, output)
+        external_coa_report_codes = external_coa_data['Report Code'].tolist()
+        external_coa_mapped_account_types = classify_account_types(external_coa_account_types,
+                                                                   external_coa_report_codes, 15)
+        for i in range(len(external_coa_data)):
+            if external_coa_mapped_account_types[i] != '':
+                external_coa_data.iloc[i]['*Type'] = external_coa_mapped_account_types[i]
+
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
