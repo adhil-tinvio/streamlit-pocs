@@ -261,10 +261,18 @@ def run_process():
         final_output_csv = convert_df_to_csv(final_df)
         col1, col2, col3 = st.columns([15, 10, 15])
         with col2:
+            instructions = """
+                ### Instructions:
+                
+                1. **Copy the spreadsheet data and replace the import file entry sheet.**
+                2. **Upload the file to the correct Jaz organization account.**
+                """
+            st.markdown(instructions)
+
             st.download_button(
-                label="Download data as CSV",
+                label="Download File",
                 data=final_output_csv,
-                file_name='jaz_mapped_coa.csv',
+                file_name='COA_mapped_to_jaz_import.csv',
                 mime='text/csv',
             )
 
