@@ -107,7 +107,7 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa
     st.write("JAN", jaz_accounts)
     sga_matches = recommend_sga_match(jaz_accounts, ext_coa_account_names,ext_coa_account_types, 15)
     st.write("SGA_matches", sga_matches)
-    st.write("len sga matches", len(sga_matches), len(external_coa_account_names), len(combined_accounts))
+    st.write("len sga matches", len(sga_matches), len(ext_coa_account_names), len(combined_accounts))
     cnt=0
     for i in range(len(sga_matches)):
         if sga_matches[i] != 'No Suitable Match':
