@@ -89,7 +89,7 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_acco
     return results
 
 
-def match_coa_using_gpt(external_coa_df, jaz_coa_df, chart_of_accounts_map, mapped_coa_names):
+def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_names):
     st.write(external_coa_df, "COA")
     st.write(external_coa_df.columns, "COLS")
     unmapped_external_coa = external_coa_df[~(external_coa_df['*Name'].isin(mapped_coa_names))]
@@ -100,7 +100,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, chart_of_accounts_map, mapp
     for i in range(len(jaz_coa_df)):
         account_name = jaz_coa_df.iloc[i]['Name*']
         account_type = jaz_coa_df.iloc[i]['Account Type*']
-        if chart_of_accounts_map[account_name]['Match']:
+        if jaz_coa_map[account_name]['Match']:
             continue
         else:
             jaz_account_names.append(account_name)
@@ -123,12 +123,12 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, chart_of_accounts_map, mapp
             st.write("filtered df length", len(filtered_df), jaz_coa_name, ext_coa_name, filtered_df)
             if len(filtered_df) > 0:
                 filtered_row = filtered_df.iloc[0]
-                chart_of_accounts_map[jaz_coa_name]['Code'] = filtered_row['*Code']
-                chart_of_accounts_map[jaz_coa_name]['Description'] = filtered_row['Description']
-                chart_of_accounts_map[jaz_coa_name]['Match'] = True
-                chart_of_accounts_map[jaz_coa_name]['Status'] = 'ACTIVE'
-                chart_of_accounts_map[jaz_coa_name]['Match Type'] = 'GPT'
-    return chart_of_accounts_map, mapped_coa_names
+                jaz_coa_map[jaz_coa_name]['Code'] = filtered_row['*Code']
+                jaz_coa_map[jaz_coa_name]['Description'] = filtered_row['Description']
+                jaz_coa_map[jaz_coa_name]['Match'] = True
+                jaz_coa_map[jaz_coa_name]['Status'] = 'ACTIVE'
+                jaz_coa_map[jaz_coa_name]['Match Type'] = 'GPT'
+    return jaz_coa_map, mapped_coa_names
 
 
 def convert_df_to_csv(df):
