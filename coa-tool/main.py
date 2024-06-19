@@ -284,7 +284,7 @@ def run_process():
         st.write(external_coa_account_types,external_coa_mapped_account_types,"check")
         for i in range(len(external_coa_data)):
             if external_coa_mapped_account_types[i] != '':
-                external_coa_data.iloc[i]['*Type'] = external_coa_mapped_account_types[i]
+                external_coa_data.at[i, '*Type'] = external_coa_mapped_account_types[i]
 
         st.write("AFter",external_coa_data)
         jaz_coa_map = defaultdict(dict)
