@@ -28,7 +28,7 @@ def sga_prompt_generator(chart_of_accounts):
     return sga_prompt
 
 
-def recommend_sga_match(coa_names, account_names,account_types, batch_size=15):
+def recommend_sga_match(coa_names, account_names, account_types, batch_size=15):
     headers = {
         'Authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json',
@@ -37,13 +37,13 @@ def recommend_sga_match(coa_names, account_names,account_types, batch_size=15):
     sga_prompt = sga_prompt_generator(coa_names)
     st.write("COa nems", coa_names)
     st.write("SGA prompt", sga_prompt)
-    st.write("account details", account_names,account_types)
+    st.write("account details", account_names, account_types)
 
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(account_names))
         #batch = account_details[start_index:end_index]
-        c_an=account_names[start_index:end_index]
-        c_at=account_types[start_index:end_index]
+        c_an = account_names[start_index:end_index]
+        c_at = account_types[start_index:end_index]
         messages = [{'role': 'system', 'content': sga_prompt}]
         for t in range(len(c_an)):
             messages.append({'role': 'user', 'content': f"Account Name: {c_an[t]} - Account Type:{c_at[t]}"})
@@ -83,16 +83,16 @@ def recommend_sga_match(coa_names, account_names,account_types, batch_size=15):
 def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa_names):
     st.write(external_coa, "COA")
     st.write(external_coa.columns, "COLS")
-    unmapped_external_coa=external_coa[~(external_coa['*Name'].isin(mapped_coa_names))]
+    unmapped_external_coa = external_coa[~(external_coa['*Name'].isin(mapped_coa_names))]
     external_coa_account_names = [name for name in unmapped_external_coa]
     st.write(external_coa_account_names, "ACNAMES")
     st.write("jaz template", jaz_coa)
     jazz_an = []
-    jazz_at= []
+    jazz_at = []
     st.write("jaz_ans", jaz_coa['Name*'].tolist())
     for i in range(len(jaz_coa)):
-        name=jaz_coa.iloc[i]['Name*']
-        ac_type=jaz_coa.iloc[i]['Account Type*']
+        name = jaz_coa.iloc[i]['Name*']
+        ac_type = jaz_coa.iloc[i]['Account Type*']
         if chart_of_accounts_map[name]['Match']:
             continue
         else:
@@ -102,28 +102,30 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa
     #combined_accounts = [f"{name} " for name in external_coa_account_names]
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
-    combined_accounts = [f"{name} - {acnt_type}" for name, acnt_type in zip(ext_coa_account_names, ext_coa_account_types)]
-    jaz_accounts = [f"{name} - {ac_type}" for name,ac_type in zip(jazz_an, jazz_at)]
+    combined_accounts = [f"{name} - {acnt_type}" for name, acnt_type in
+                         zip(ext_coa_account_names, ext_coa_account_types)]
+    jaz_accounts = [f"{name} - {ac_type}" for name, ac_type in zip(jazz_an, jazz_at)]
     st.write("JAN", jaz_accounts)
-    sga_matches = recommend_sga_match(jaz_accounts, ext_coa_account_names,ext_coa_account_types, 15)
+    sga_matches = recommend_sga_match(jaz_accounts, ext_coa_account_names, ext_coa_account_types, 15)
     st.write("SGA_matches", sga_matches)
     st.write("len sga matches", len(sga_matches), len(ext_coa_account_names), len(combined_accounts))
-    cnt=0
+    cnt = 0
     for i in range(len(sga_matches)):
         if sga_matches[i] != 'No Suitable Match':
-            cnt+=1
+            cnt += 1
             jaz_coa_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             mapped_coa_names.add(ext_coa_name)
             filtered_df = external_coa[external_coa['*Name'] == ext_coa_name]
-            st.write("filtered df length", len(filtered_df),jaz_coa_name, ext_coa_name, filtered_df)
-            if len(filtered_df)>0:
+            st.write("filtered df length", len(filtered_df), jaz_coa_name, ext_coa_name, filtered_df)
+            if len(filtered_df) > 0:
                 rowz = filtered_df.iloc[0]
                 chart_of_accounts_map[jaz_coa_name]['Code'] = rowz['*Code']
                 chart_of_accounts_map[jaz_coa_name]['Description'] = rowz['Description']
                 chart_of_accounts_map[jaz_coa_name]['Match'] = True
                 chart_of_accounts_map[jaz_coa_name]['Status'] = 'ACTIVE'
-    st.write("final_Cnt",cnt)
+                coa_map[row['jaz_sga_name']]['Match Type'] = 'GPT'
+    st.write("final_Cnt", cnt)
     return chart_of_accounts_map, mapped_coa_names
 
 
@@ -169,6 +171,7 @@ if external_coa_file is not None and jaz_coa_file is not None:
                 coa_map[row['jaz_sga_name']]['Description'] = row['Description']
                 coa_map[row['jaz_sga_name']]['Match'] = True
                 coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
+                coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
                 mapped_external_coa_names.add(row['*Name'])
     st.write("GOAT", coa_map)
     coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, coa_map,
