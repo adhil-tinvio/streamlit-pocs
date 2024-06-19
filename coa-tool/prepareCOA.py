@@ -124,7 +124,7 @@ def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa
                 chart_of_accounts_map[jaz_coa_name]['Description'] = rowz['Description']
                 chart_of_accounts_map[jaz_coa_name]['Match'] = True
                 chart_of_accounts_map[jaz_coa_name]['Status'] = 'ACTIVE'
-                coa_map[row['jaz_sga_name']]['Match Type'] = 'GPT'
+                chart_of_accounts_map[jaz_coa_name]['Match Type'] = 'GPT'
     st.write("final_Cnt", cnt)
     return chart_of_accounts_map, mapped_coa_names
 
