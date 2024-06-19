@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import concurrent.futures
 from collections import defaultdict
+from fuzzywuzzy import fuzz
 
 API_KEY = st.secrets["API_KEY"]
 ACTIVE_ONLY_ACCOUNTS = ['FX Realized Currency (Gains)/Losses',
@@ -32,6 +33,63 @@ COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
                             'Lock Date',
                             'Status',
                             'Unique ID (do not edit)']
+
+jaz_account_type_mappings = {
+    "Current Liability": "Liability - Current Liability",
+    "Bank Accounts": "Asset - Bank Accounts",
+    "Operating Expense": "Expense - Operating Expense",
+    "Current Asset": "Asset - Current Asset",
+    "Direct Costs": "Expense - Direct Costs",
+    "Shareholders Equity": "Equity - Shareholders Equity",
+    "Fixed Asset": "Asset - Fixed Asset",
+    "Non-current Asset": "Asset - Non-current Asset",
+    "Non-current Liability": "Liability - Non-current Liability",
+    "Other Revenue": "Revenue - Other Revenue",
+    "Operating Revenue": "Revenue - Operating Revenue",
+    "Inventory": "Asset - Inventory",
+    "Cash": "Asset - Cash"
+}
+
+external_account_type_mappings = {
+    "Accounts Payable": "Liability - Current Liability",
+    "Accounts Receivable": "Asset - Current Asset",
+    "Bank": "Asset - Bank Accounts",
+    "Bank Revaluations": "Expense - Operating Expense",
+    "Current Asset": "Asset - Current Asset",
+    "Current Liability": "Liability - Current Liability",
+    "Direct Costs": "Expense - Direct Costs",
+    "Equity": "Equity - Shareholders Equity",
+    "Expense": "Expense - Operating Expense",
+    "Fixed Asset": "Asset - Fixed Asset",
+    "Historical Adjustment": "Liability - Current Liability",
+    "Non-Current Asset": "Asset - Non-current Asset",
+    "Non-current Liability": "Liability - Non-current Liability",
+    "Other Income": "Revenue - Other Revenue",
+    "Realized Currency Gains": "Expense - Operating Expense",
+    "Retained Earnings": "Equity - Shareholders Equity",
+    "Revenue": "Revenue - Operating Revenue",
+    "Rounding": "Liability - Current Liability",
+    "Sales Tax": "Liability - Current Liability",
+    "Tracking": "Liability - Current Liability",
+    "Unpaid Expense Claims": "Liability - Current Liability",
+    "Unrealized Currency Gains": "Expense - Operating Expense",
+    "Wages Payable": "Liability - Current Liability",
+    "Inventory": "Asset - Inventory",
+    "Cash": "Asset - Cash"
+}
+
+
+# Function to return the right column value
+def get_account_type_mapping(external_account_type):
+    for key, value in external_account_type_mappings:
+        if fuzz.ratio(key, external_account_type) > 95:
+            return value
+
+    for key, value in jaz_account_type_mappings:
+        if fuzz.ratio(key, external_account_type) > 95:
+            return value
+    return f'Not Mapped: {external_account_type}'
+
 
 account_type_prompt = """
 You are a skilled accountant. Determine the closest matching Accepted Account Type for each Account Type or Report Code combination given as input below. 
@@ -278,16 +336,10 @@ def run_process():
                 if col in COLUMNS_WITHOUT_CURRENCY:
                     column_order.append(col)
 
-        external_coa_account_types = external_coa_data['*Type'].tolist()
-        external_coa_report_codes = external_coa_data['Report Code'].tolist()
-        external_coa_mapped_account_types = classify_account_types(external_coa_account_types,
-                                                                   external_coa_report_codes, 15)
-        st.write(external_coa_account_types,external_coa_mapped_account_types,"OP")
         for i in range(len(external_coa_data)):
-            if (external_coa_mapped_account_types[i] != ''
-                    and external_coa_mapped_account_types[i] != 'Error in classification'):
-                external_coa_data.at[i, '*Type'] = external_coa_mapped_account_types[i]
+            external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
 
+        st.write("ECOA",external_coa_data)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
