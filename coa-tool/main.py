@@ -35,7 +35,7 @@ COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
 
 account_type_prompt = """
 You are a skilled accountant. 
-Determine the closest matching account type for each account below. 
+Determine the closest matching account type for each Account Type - Report Code combination given as input below. 
 If there is no matching type, name it 'Not an Account type'. 
 
 The possible types are:
@@ -55,15 +55,17 @@ The possible types are:
 14. Revenue - Other Revenue
 
 Criteria:
-1) Return only Account Type form the above as response,If there is no close match, name it 'No Suitable Account Type Match'.
-2) If there are 15 bank accounts types given in a batch, you must return exactly 15 mapped account types (meaning 15 values returned, even if all 15 are 'No Suitable Account Type Match'), Including 'No Suitable Account Type Match'. This is so that the format will not get messed up. 
+1) Return only Account Type form the above as response,If there is no close match,return 'Not an Account type'.
+2) If there are 15 bank accounts types given in a batch, you must return exactly 15 mapped account types 
+(meaning 15 values returned, even if all 15 are 'Not an Account type'), Including 'Not an Account type'. 
+This is so that the format will not get messed up. 
 3) Please do not give them index numbers at all.
 4) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
 5) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
 """
 
 
-def classify_account_types(account_types, batch_size=15):
+def classify_account_types(account_types,report_codes, batch_size=15):
     headers = {
         'Authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json',
@@ -72,22 +74,23 @@ def classify_account_types(account_types, batch_size=15):
 
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(account_types))
-        batch = account_types[start_index:end_index]
+        account_type_batch = account_types[start_index:end_index]
+        report_code_batch = report_codes[start_index:end_index]
         messages = [{
             'role': 'system',
             'content': account_type_prompt
         }]
-        for account_type in batch:
+        for i in range(len(account_type_batch)):
             messages.append({
                 'role': 'user',
-                'content': f"Account Type: {account_type}"
+                'content': f"Account Type: {account_type_batch[i]}  Report Code: {report_code_batch}"
             })
 
         data = {
             "model": "gpt-4-turbo",
             "messages": messages,
-            "temperature": 0.5,
-            "max_tokens": 1500
+            "temperature": 0.3,
+            "max_tokens": 1000
         }
 
         try:
@@ -98,13 +101,13 @@ def classify_account_types(account_types, batch_size=15):
             content = content.strip("```").strip()
             batch_results = [line.strip() for line in content.split('\n')]
 
-            if len(batch_results) != len(batch):
-                print("batch: ", batch)
+            if len(batch_results) != len(account_type_batch):
+                print("batch: ", account_type_batch)
                 print("batch results: ", batch_results)
-                raise ValueError(f"Expected {len(batch)} results, but got {len(batch_results)}")
+                raise ValueError(f"Expected {len(account_type_batch)} results, but got {len(batch_results)}")
         except (requests.exceptions.RequestException, ValueError, IndexError) as e:
             print(f"Error processing batch: {e}")
-            batch_results = ["Error in classification"] * len(batch)
+            batch_results = ["Error in classification"] * len(account_type_batch)
 
         results[start_index:end_index] = batch_results
 
@@ -274,7 +277,8 @@ def run_process():
                     column_order.append(col)
 
         external_coa_account_types = external_coa_data['*Type'].tolist()
-        output = classify_account_types(external_coa_account_types,25)
+        external_coa_report_codes =external_coa_data['Report Code'].tolist()
+        output = classify_account_types(external_coa_account_types,external_coa_report_codes,15)
         st.write(external_coa_account_types, output)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
