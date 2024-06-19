@@ -62,9 +62,6 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_acco
     }
     results = [None] * len(ext_coa_account_names)
     sga_prompt = sga_prompt_generator(jaz_account_details)
-    st.write("COa nems", jaz_account_details)
-    st.write("SGA prompt", sga_prompt)
-    st.write("account details", ext_coa_account_names, ext_coa_account_types)
 
     def process_batch(start_index):
         end_index = min(start_index + batch_size, len(ext_coa_account_names))
@@ -110,7 +107,6 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     unmapped_external_coa = external_coa_df[~(external_coa_df['*Name'].isin(mapped_coa_names))]
     jaz_account_names = []
     jaz_account_types = []
-    st.write("jaz_ans", jaz_coa_df['Name*'].tolist())
     for i in range(len(jaz_coa_df)):
         account_name = jaz_coa_df.iloc[i]['Name*']
         account_type = jaz_coa_df.iloc[i]['Account Type*']
