@@ -337,9 +337,7 @@ def run_process():
                     column_order.append(col)
 
         for i in range(len(external_coa_data)):
-            st.write(i,external_coa_data.iloc[i]['*Type'],get_account_type_mapping(external_coa_data.iloc[i]['*Type']))
             external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
-        st.write("ECOAdata",external_coa_data)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
