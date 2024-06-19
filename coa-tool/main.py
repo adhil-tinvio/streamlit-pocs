@@ -16,6 +16,23 @@ ACTIVE_ONLY_ACCOUNTS = ['FX Realized Currency (Gains)/Losses',
                         'Retained Earnings'
                         'Output VAT Payable']
 
+COLUMNS_WITH_CURRENCY = ['Account Type*',
+                         'Currency*',
+                         'Name*',
+                         'Code',
+                         'Description',
+                         'Lock Date',
+                         'Status',
+                         'Unique ID (do not edit)']
+
+COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
+                            'Name*',
+                            'Code',
+                            'Description',
+                            'Lock Date',
+                            'Status',
+                            'Unique ID (do not edit)']
+
 
 def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
@@ -175,10 +192,18 @@ def run_process():
         external_coa_data = pd.read_csv(external_coa_file)
         jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
         jaz_coa_df_columns = jaz_coa_data.columns
-        st.write("jACOADF",jaz_coa_df_columns)
+        st.write("jACOADF", jaz_coa_df_columns)
         currency_flag = False
         if 'Currency*' in jaz_coa_df_columns:
             currency_flag = True
+        column_order = []
+        for col in jaz_coa_df_columns:
+            if currency_flag:
+                if col in COLUMNS_WITH_CURRENCY:
+                    column_order.append(col)
+            else:
+                if col in COLUMNS_WITHOUT_CURRENCY:
+                    column_order.append(col)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
@@ -248,7 +273,7 @@ def run_process():
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         # Reset the index to move the outer dictionary keys to a column
         final_df.reset_index(drop=True, inplace=True)
-        final_df = final_df[jaz_coa_df_columns]
+        final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
         col1, col2, col3 = st.columns([15, 10, 15])
         with col2:
