@@ -140,21 +140,22 @@ def run_process():
                 "Jaz COA Import Mapping Tool (SG-EN)</div>",
                 unsafe_allow_html=True)
     st.write("")
+    st.write("")
     st.markdown("""
-            <div style='text-align: center; margin-bottom: 20px;'>
-                <h1 style='font-size: 15px; font-weight: bold;'>Please upload External COA File</h1>
+            <div style='text-align: center; margin-bottom: 5px;'>
+                <h1 style='font-size: 20px; font-weight: bold;'>Please upload External COA File</h1>
             </div>
         """, unsafe_allow_html=True)
     st.write("")
-    external_coa_file = st.file_uploader("",type=["csv"])
+    external_coa_file = st.file_uploader("", type=["csv"])
     st.write("")
     st.write("")
     st.markdown("""
-            <div style='text-align: center; margin-bottom: 20px;'>
-                <h1 style='font-size: 15px; font-weight: bold;'>Please upload JAZ COA Import File</h1>
+            <div style='text-align: center; margin-bottom: 5px;'>
+                <h1 style='font-size: 20px; font-weight: bold;'>Please upload JAZ COA Import File</h1>
             </div>
         """, unsafe_allow_html=True)
-    jaz_coa_file = st.file_uploader("",type=["xlsx"])
+    jaz_coa_file = st.file_uploader("", type=["xlsx"])
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_data = pd.read_csv(external_coa_file)
         jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
