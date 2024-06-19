@@ -270,7 +270,7 @@ def run_process():
                     column_order.append(col)
 
         external_coa_account_types = external_coa_data['*Type'].tolist()
-        output = classify_account_types(external_coa_account_types)
+        output = classify_account_types(external_coa_account_types,25)
         st.write(external_coa_account_types, output)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
