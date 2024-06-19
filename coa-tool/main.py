@@ -28,21 +28,21 @@ def sga_prompt_generator(chart_of_accounts):
     return sga_prompt
 
 
-def recommend_sga_match(coa_names, account_names, account_types, batch_size=15):
+def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, batch_size=15):
     headers = {
         'Authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json',
     }
-    results = [None] * len(account_names)
-    sga_prompt = sga_prompt_generator(coa_names)
-    st.write("COa nems", coa_names)
+    results = [None] * len(ext_coa_account_names)
+    sga_prompt = sga_prompt_generator(jaz_account_details)
+    st.write("COa nems", jaz_account_details)
     st.write("SGA prompt", sga_prompt)
-    st.write("account details", account_names, account_types)
+    st.write("account details", ext_coa_account_names, ext_coa_account_types)
 
     def process_batch(start_index):
-        end_index = min(start_index + batch_size, len(account_names))
-        c_an = account_names[start_index:end_index]
-        c_at = account_types[start_index:end_index]
+        end_index = min(start_index + batch_size, len(ext_coa_account_names))
+        c_an = ext_coa_account_names[start_index:end_index]
+        c_at = ext_coa_account_types[start_index:end_index]
         messages = [{'role': 'system', 'content': sga_prompt}]
         for t in range(len(c_an)):
             messages.append({'role': 'user', 'content': f"Account Name: {c_an[t]} - Account Type:{c_at[t]}"})
@@ -73,49 +73,47 @@ def recommend_sga_match(coa_names, account_names, account_types, batch_size=15):
         results[start_index:end_index] = batch_results
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        indices = range(0, len(account_names), batch_size)
+        indices = range(0, len(ext_coa_account_names), batch_size)
         executor.map(process_batch, indices)
 
     return results
 
 
-def match_coa_using_gpt(external_coa, jaz_coa, chart_of_accounts_map, mapped_coa_names):
-    st.write(external_coa, "COA")
-    st.write(external_coa.columns, "COLS")
-    unmapped_external_coa = external_coa[~(external_coa['*Name'].isin(mapped_coa_names))]
-    st.write("jaz template", jaz_coa)
-    jazz_an = []
-    jazz_at = []
-    st.write("jaz_ans", jaz_coa['Name*'].tolist())
-    for i in range(len(jaz_coa)):
-        name = jaz_coa.iloc[i]['Name*']
-        ac_type = jaz_coa.iloc[i]['Account Type*']
-        if chart_of_accounts_map[name]['Match']:
+def match_coa_using_gpt(external_coa_df, jaz_coa_df, chart_of_accounts_map, mapped_coa_names):
+    st.write(external_coa_df, "COA")
+    st.write(external_coa_df.columns, "COLS")
+    unmapped_external_coa = external_coa_df[~(external_coa_df['*Name'].isin(mapped_coa_names))]
+    st.write("jaz template", jaz_coa_df)
+    jaz_account_names = []
+    jaz_account_types = []
+    st.write("jaz_ans", jaz_coa_df['Name*'].tolist())
+    for i in range(len(jaz_coa_df)):
+        account_name = jaz_coa_df.iloc[i]['Name*']
+        account_type = jaz_coa_df.iloc[i]['Account Type*']
+        if chart_of_accounts_map[account_name]['Match']:
             continue
         else:
-            jazz_an.append(name)
-            jazz_at.append(ac_type)
-    st.write("jax an ", jazz_an)
+            jaz_account_names.append(account_name)
+            jaz_account_types.append(account_type)
+    st.write("jax an ", jaz_account_names)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
-    combined_accounts = [f"{name} - {acnt_type}" for name, acnt_type in
-                         zip(ext_coa_account_names, ext_coa_account_types)]
-    jaz_accounts = [f"{name} - {ac_type}" for name, ac_type in zip(jazz_an, jazz_at)]
-    st.write("JAN", jaz_accounts)
-    sga_matches = recommend_sga_match(jaz_accounts, ext_coa_account_names, ext_coa_account_types, 15)
+    jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in zip(jaz_account_names, jaz_account_types)]
+    st.write("JAN", jaz_account_details)
+    sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
     st.write("SGA_matches", sga_matches)
-    st.write("len sga matches", len(sga_matches), len(ext_coa_account_names), len(combined_accounts))
+    st.write("len sga matches", len(sga_matches), len(ext_coa_account_names))
     for i in range(len(sga_matches)):
         if sga_matches[i] != 'No Suitable Match':
             jaz_coa_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             mapped_coa_names.add(ext_coa_name)
-            filtered_df = external_coa[external_coa['*Name'] == ext_coa_name]
+            filtered_df = external_coa_df[external_coa_df['*Name'] == ext_coa_name]
             st.write("filtered df length", len(filtered_df), jaz_coa_name, ext_coa_name, filtered_df)
             if len(filtered_df) > 0:
-                rowz = filtered_df.iloc[0]
-                chart_of_accounts_map[jaz_coa_name]['Code'] = rowz['*Code']
-                chart_of_accounts_map[jaz_coa_name]['Description'] = rowz['Description']
+                filtered_row = filtered_df.iloc[0]
+                chart_of_accounts_map[jaz_coa_name]['Code'] = filtered_row['*Code']
+                chart_of_accounts_map[jaz_coa_name]['Description'] = filtered_row['Description']
                 chart_of_accounts_map[jaz_coa_name]['Match'] = True
                 chart_of_accounts_map[jaz_coa_name]['Status'] = 'ACTIVE'
                 chart_of_accounts_map[jaz_coa_name]['Match Type'] = 'GPT'
