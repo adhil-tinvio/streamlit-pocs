@@ -61,8 +61,10 @@ EQU = Equity - Shareholders Equity
 Criteria:
 1) Return only Accepted Account Type from the list above as response. If there is no close match,return ''.
 2) Please do not give them index numbers at all.
-3) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-4) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT5
+3) Make sure the return list length is exactly the same as the input size length
+ (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
+4) Please do not have empty lines in your return. The results should all be in the next line 
+(VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
 """
 
 
@@ -91,7 +93,7 @@ def classify_account_types(account_types, report_codes, batch_size=15):
             "model": "gpt-4-turbo",
             "messages": messages,
             "temperature": 0.5,
-            "max_tokens": 1200
+            "max_tokens": 1000
         }
 
         try:
