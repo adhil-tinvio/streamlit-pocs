@@ -146,6 +146,7 @@ def run_process():
             text-align: center;
             font-size: 45px;
             font-weight: bold;
+            white-space: nowrap;
         ">
             Jaz COA Import Mapping Tool (SG-EN)
         </div>
