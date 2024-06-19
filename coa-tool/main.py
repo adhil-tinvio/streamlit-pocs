@@ -90,8 +90,8 @@ def classify_account_types(account_types, report_codes, batch_size=15):
         data = {
             "model": "gpt-4-turbo",
             "messages": messages,
-            "temperature": 0.3,
-            "max_tokens": 1000
+            "temperature": 0.5,
+            "max_tokens": 1200
         }
 
         try:
