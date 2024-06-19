@@ -198,8 +198,8 @@ if external_coa_file is not None and jaz_coa_file is not None:
                    'FX Rounding (Gains)/Losses'
                    'Accounts Receivable'
                    'Retained Earnings'
-                   'Output VAT Payable'] and jaz_coa_map[key]['Status']=='INACTIVE':
-            st.write("incative active")
+                   'Output VAT Payable'] and jaz_coa_map[key]['Status'] == 'INACTIVE':
+            st.write("incative active",key)
             jaz_coa_map[key]['Status'] = 'ACTIVE'
 
     st.write("Processed Data final", jaz_coa_map)
