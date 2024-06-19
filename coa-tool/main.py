@@ -34,12 +34,11 @@ COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
                             'Unique ID (do not edit)']
 
 account_type_prompt = """
-You are a skilled accountant. 
-Determine the closest matching account type for each Account Type - Report Code combination given as input below. 
-If there is no matching type, name it 'Not an Account type'. 
+You are a skilled accountant. Determine the closest matching Accepted Account Type for each Account Type or Report Code combination given as input below. 
+If there is no matching type, return an empty value
 
-The possible types are:
-1. Asset - Bank Accounts
+The accepted account types are:
+1. Asset - Bank Accounts 
 2. Asset - Cash
 3. Asset - Current Asset
 4. Asset - Fixed Asset
@@ -54,14 +53,16 @@ The possible types are:
 13. Revenue - Operating Revenue
 14. Revenue - Other Revenue
 
+Only if the account type was not sufficient to determine the correct accepted account type, then use the report code to 
+determine the accepted account type. Here is a help abbreviation glossary that maps to the accepted account types:
+EXP = Expense - Operating Expense
+EQU = Equity - Shareholders Equity
+
 Criteria:
-1) Return only Account Type form the above as response,If there is no close match,return 'Not an Account type'.
-2) If there are 15 bank accounts types given in a batch, you must return exactly 15 mapped account types 
-(meaning 15 values returned, even if all 15 are 'Not an Account type'), Including 'Not an Account type'. 
-This is so that the format will not get messed up. 
-3) Please do not give them index numbers at all.
-4) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-5) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
+1) Return only Accepted Account Type from the list above as response. If there is no close match,return ''.
+2) Please do not give them index numbers at all.
+3) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
+4) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT5
 """
 
 
@@ -129,7 +130,7 @@ def sga_prompt_generator(chart_of_accounts):
     sga_prompt += """
     1) Return only Account Name as response,If there is no close match, name it 'No Suitable Match'.
     2) The matches must be 1:1, meaning each account name from the list must be paired uniquely with one account from the COA and vice versa. This is very important.
-    3) If there are 15 bank accounts given in a batch, you must return exactly 15 mapped account types (meaning 15 values returned, even if all 15 are no suitable match), Including No Suitable Match. This is so that the format will not get messed up. 
+    3) If there are 15 chart of accounts details given in a batch, you must return exactly 15 mapped account names (meaning 15 values returned, even if all 15 are no suitable match), Including No Suitable Match. This is so that the format will not get messed up. 
     4) Please do not give them index numbers at all.
     5) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
     6) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
