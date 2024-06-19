@@ -174,6 +174,10 @@ def run_process():
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_data = pd.read_csv(external_coa_file)
         jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
+        jaz_coa_df_columns = jaz_coa_data.columns
+        currency_flag = False
+        if 'Currency*' in jaz_coa_df_columns:
+            currency_flag = True
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
@@ -194,6 +198,8 @@ def run_process():
                 "Match": False,
                 "Status": "INACTIVE"
             }
+            if currency_flag:
+                jaz_coa_map[account_name]['Currency*'] = row['Currency*']
 
         for i in range(len(external_coa_data)):
             row = external_coa_data.iloc[i]
@@ -229,6 +235,8 @@ def run_process():
                     "Match": False,
                     "Status": "ACTIVE"
                 }
+                if currency_flag:
+                    jaz_coa_map[account_name]['Currency*'] = ""
 
         for key, value in jaz_coa_map.items():
             if key in ACTIVE_ONLY_ACCOUNTS and jaz_coa_map[key]['Status'] == 'INACTIVE':
@@ -239,6 +247,7 @@ def run_process():
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         # Reset the index to move the outer dictionary keys to a column
         final_df.reset_index(drop=True, inplace=True)
+        final_df = final_df[jaz_coa_df_columns]
         final_output_csv = convert_df_to_csv(final_df)
         col1, col2, col3 = st.columns([15, 10, 15])
         with col2:
