@@ -180,13 +180,14 @@ if external_coa_file is not None and jaz_coa_file is not None:
             account_type = row['*Type']
             code = row['*Code']
             description = row['Description']
-            lock_date = row['Lock Date']
+            lock_date = ""
             unique_id = ""
             coa_map[account_name] = {
                 "Account Type*": account_type,
                 "Name*": account_name,
                 "Code": code,
                 "Description": description,
+                "Lock Date": lock_date,
                 "Unique ID (do not edit)": unique_id,
                 "Match": False,
                 "Status": "ACTIVE"
