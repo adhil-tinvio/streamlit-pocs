@@ -262,9 +262,9 @@ def run_process():
         instructions = """
         <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
             <div>
-                <h2 style="text-align: center;">Instructions:</h2>
-                <p style="margin: 5px 0;"><strong>1. Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
-                <p style="margin: 5px 0;"><strong>2. Upload the file to the correct Jaz organization account.</strong></p>
+                <h3 style="text-align: center;">Instructions:</h3>
+                <p style="margin: 4px 0;"><strong>1. Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
+                <p style="margin: 4px 0;"><strong>2. Upload the file to the correct Jaz organization account.</strong></p>
             </div>
         </div>
         """
