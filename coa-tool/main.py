@@ -337,6 +337,7 @@ def run_process():
                     column_order.append(col)
 
         for i in range(len(external_coa_data)):
+            st.write(i,external_coa_data.iloc[i]['*Type'],get_account_type_mapping(external_coa_data.iloc[i]['*Type']))
             external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
 
         jaz_coa_map = defaultdict(dict)
