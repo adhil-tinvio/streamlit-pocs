@@ -265,14 +265,12 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in
                            zip(jaz_account_names, jaz_account_types)]
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
-    st.write("EXTCIA",sga_matches,ext_coa_account_names)
     for i in range(len(sga_matches)):
         if sga_matches[i] != 'No Suitable Match':
             jaz_coa_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             mapped_coa_names.add(ext_coa_name)
             filtered_df = external_coa_df[external_coa_df['*Name'] == ext_coa_name]
-            st.write(i,jaz_coa_name,ext_coa_name,len(filtered_df),"COACHECK")
             if len(filtered_df) > 0:
                 filtered_row = filtered_df.iloc[0]
                 jaz_coa_map[jaz_coa_name]['Code'] = filtered_row['*Code']
@@ -280,7 +278,6 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
                 jaz_coa_map[jaz_coa_name]['Match'] = True
                 jaz_coa_map[jaz_coa_name]['Status'] = 'ACTIVE'
                 jaz_coa_map[jaz_coa_name]['Match Type'] = 'GPT'
-            st.write(jaz_coa_map[jaz_coa_name],jaz_coa_name,"checkname")
     return jaz_coa_map, mapped_coa_names
 
 
@@ -327,7 +324,6 @@ def run_process():
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_data = pd.read_csv(external_coa_file)
         jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
-        st.write("CSVV",external_coa_data)
         jaz_coa_df_columns = jaz_coa_data.columns
         currency_flag = False
         if 'Currency*' in jaz_coa_df_columns:
@@ -378,15 +374,12 @@ def run_process():
                     jaz_coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
                     jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
                     mapped_external_coa_names.add(row['*Name'])
-        st.write("JAZCO_CP1",jaz_coa_map)
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
                                                                      mapped_external_coa_names)
-        st.write("MAPPED TILL NOW",mapped_external_coa_names)
-        st.write("jaz_coa_till_now",jaz_coa_map)
+
         for p in range(len(external_coa_data)):
             row = external_coa_data.iloc[p]
             if row['*Name'] not in mapped_external_coa_names:
-                st.write("RONAMECHECK",row['*Name'])
                 account_name = row['*Name']
                 account_type = row['*Type']
                 code = row['*Code']
@@ -410,9 +403,7 @@ def run_process():
             if key in ACTIVE_ONLY_ACCOUNTS:
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
-        st.write("JMAPOP",jaz_coa_map)
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
-        st.write("final df",final_df)
         # Reset the index to move the outer dictionary keys to a column
         #final_df.reset_index(drop=True, inplace=True)
         final_df = final_df[column_order]
