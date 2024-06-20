@@ -79,6 +79,14 @@ external_account_type_mappings = {
 }
 
 
+def validate_sga_match_response(value):
+    if value in ['No Suitable Match', 'Error in classification', '']:
+        return False
+    if pd.isna(value):
+        return False
+    return True
+
+
 # Function to return the right column value
 def get_account_type_mapping(external_account_type):
     for key, value in external_account_type_mappings.items():
@@ -266,7 +274,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
                            zip(jaz_account_names, jaz_account_types)]
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
     for i in range(len(sga_matches)):
-        if sga_matches[i] != 'No Suitable Match':
+        if validate_sga_match_response(sga_matches[i]):
             jaz_coa_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             mapped_coa_names.add(ext_coa_name)
