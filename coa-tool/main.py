@@ -398,7 +398,7 @@ def run_process():
                     jaz_coa_map[account_name]['Currency*'] = ""
 
         for key, value in jaz_coa_map.items():
-            if key in ACTIVE_ONLY_ACCOUNTS and jaz_coa_map[key]['Status'] == 'INACTIVE':
+            if key in ACTIVE_ONLY_ACCOUNTS:
                 st.write(key)
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
