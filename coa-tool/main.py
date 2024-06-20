@@ -331,11 +331,6 @@ def run_process():
         """, unsafe_allow_html=True)
     st.write("")
     external_coa_file = st.file_uploader("", type=["csv"])
-    if external_coa_file is not None:
-        external_coa_data = pd.read_csv(external_coa_file)
-        if 'jaz_sga_name' not in external_coa_data.columns:
-            st.error("Please add column jaz_sga_name and mapping for controlled accounts to the external COA file")
-            st.stop()
     st.write("")
     st.write("")
     st.markdown("""
@@ -346,6 +341,9 @@ def run_process():
     jaz_coa_file = st.file_uploader("", type=["xlsx"])
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_data = pd.read_csv(external_coa_file)
+        if 'jaz_sga_name' not in external_coa_data.columns:
+            st.error("Please add column jaz_sga_name and mapping for controlled accounts to the external COA file")
+            st.stop()
         jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
         jaz_coa_df_columns = jaz_coa_data.columns
         currency_flag = False
