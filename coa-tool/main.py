@@ -265,6 +265,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in
                            zip(jaz_account_names, jaz_account_types)]
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
+    st.write("EXTCIA",sga_matches,ext_coa_account_names)
     for i in range(len(sga_matches)):
         if sga_matches[i] != 'No Suitable Match':
             jaz_coa_name = sga_matches[i]
