@@ -294,19 +294,19 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
         if validate_sga_match_response(sga_matches[i]) and sga_conflict_map[sga_matches[i]] == 1:
             jaz_coa_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
-            mapped_coa_names.add(ext_coa_name)
             filtered_df = external_coa_df[external_coa_df['*Name'] == ext_coa_name]
             st.write(i, ext_coa_name, jaz_coa_name, len(filtered_df))
             gpt_tag = f"GPTN {i}"
             if jaz_coa_name in jaz_coa_map:
                 gpt_tag = f"GPTY {i}"
-            if len(filtered_df) > 0:
+            if len(filtered_df) > 0 and jaz_coa_name in jaz_coa_map:
                 filtered_row = filtered_df.iloc[0]
                 jaz_coa_map[jaz_coa_name]['Code'] = filtered_row['*Code']
                 jaz_coa_map[jaz_coa_name]['Description'] = filtered_row['Description']
                 jaz_coa_map[jaz_coa_name]['Match'] = True
                 jaz_coa_map[jaz_coa_name]['Status'] = 'ACTIVE'
                 jaz_coa_map[jaz_coa_name]['Match Type'] = gpt_tag
+                mapped_coa_names.add(ext_coa_name)
     return jaz_coa_map, mapped_coa_names
 
 
