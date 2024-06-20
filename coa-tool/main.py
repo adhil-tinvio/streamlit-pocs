@@ -272,20 +272,12 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
             jaz_account_names.append(account_name)
             jaz_account_types.append(account_type)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
-    empty_c = 0
-    for z in range(len(ext_coa_account_names)):
-        if pd.isna(ext_coa_account_names[z]) or ext_coa_account_names[z] == '':
-            empty_c += 0
-    st.write("empty_c_outp", empty_c)
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
-    st.write("already_matched_count", count, len(jaz_account_names), len(jaz_account_types),
-             "unmapped_external_coa_count", len(ext_coa_account_names), len(ext_coa_account_types))
     jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in
                            zip(jaz_account_names, jaz_account_types)]
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
     if len(sga_matches) != len(ext_coa_account_names):
-        st.write("check check check", sga_matches, ext_coa_account_names)
-    st.write("ext-coa-input-output-", sga_matches, ext_coa_account_names)
+        return jaz_coa_map, mapped_coa_names
     sga_conflict_map = defaultdict(int)
     for i in range(len(sga_matches)):
         value = sga_matches[i]
