@@ -340,6 +340,7 @@ def run_process():
 
         for i in range(len(external_coa_data)):
             external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
+        st.write("external coa updated",external_coa_data)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
