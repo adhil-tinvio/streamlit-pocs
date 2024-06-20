@@ -342,7 +342,22 @@ def run_process():
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_data = pd.read_csv(external_coa_file)
         if 'jaz_sga_name' not in external_coa_data.columns:
-            st.error("Please add column jaz_sga_name and mapping for controlled accounts to the external COA file")
+            st.error("""
+                Please add a new column “jaz_sga_name” to the external COA file. 
+                In this column, please enter a value from the list below to map to the correct controlled account.
+                
+                **Controlled Accounts**:
+                1. Accounts Payable
+                2. Accounts Receivable
+                3. Business Bank Account
+                4. FX Bank Revaluation (Gains)/Loss
+                5. FX Realized Currency (Gains)/Loss
+                6. FX Rounding (Gains)/Loss
+                7. FX Unrealized Currency (Gains)/Loss
+                8. Input GST Receivable
+                9. Output VAT Payable
+                10. Retained Earnings
+                """)
             st.stop()
         jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
         jaz_coa_df_columns = jaz_coa_data.columns
