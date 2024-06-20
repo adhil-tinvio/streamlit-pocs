@@ -272,10 +272,10 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
     jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in
                            zip(jaz_account_names, jaz_account_types)]
-    st.write("ext-coa-input", ext_coa_account_names)
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
     if len(sga_matches) != len(ext_coa_account_names):
         st.write("check check check", sga_matches, ext_coa_account_names)
+    st.write("ext-coa-input-output-", sga_matches, ext_coa_account_names)
     for i in range(len(sga_matches)):
         if validate_sga_match_response(sga_matches[i]):
             jaz_coa_name = sga_matches[i]
@@ -374,8 +374,6 @@ def run_process():
             if currency_flag:
                 jaz_coa_map[account_name]['Currency*'] = row['Currency*']
 
-        st.write("jaz_coa_map_cp3", jaz_coa_map)
-        st.write("cp3_end")
         for i in range(len(external_coa_data)):
             row = external_coa_data.iloc[i]
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
@@ -388,14 +386,10 @@ def run_process():
                     jaz_coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
                     jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
                     mapped_external_coa_names.add(row['*Name'])
-        st.write("jaz_coa_map_cp2", jaz_coa_map)
-        st.write("cp2_end")
 
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
                                                                      mapped_external_coa_names)
 
-        st.write("jaz_coa_map_cp1", jaz_coa_map)
-        st.write("cp1_end")
         for p in range(len(external_coa_data)):
             row = external_coa_data.iloc[p]
             if row['*Name'] not in mapped_external_coa_names:
