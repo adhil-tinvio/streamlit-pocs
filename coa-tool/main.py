@@ -394,10 +394,14 @@ def run_process():
                     mapped_external_coa_names.add(row['*Name'])
 
         st.write("CP3-jaz-coa-map",len(jaz_coa_map))
+        cp3_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
+        st.write("cp3_df",cp3_df)
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
                                                                      mapped_external_coa_names)
 
         st.write("CP4-jaz-coa-map",len(jaz_coa_map))
+        cp4_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
+        st.write("cp4_df",cp4_df)
         for p in range(len(external_coa_data)):
             row = external_coa_data.iloc[p]
             if row['*Name'] not in mapped_external_coa_names:
