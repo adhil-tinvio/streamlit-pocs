@@ -400,7 +400,10 @@ def run_process():
         for key, value in jaz_coa_map.items():
             st.write(key,value)
             if key in ACTIVE_ONLY_ACCOUNTS:
+                st.write("True",key)
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
+            else:
+                st.write("False",key)
 
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         # Reset the index to move the outer dictionary keys to a column
