@@ -343,7 +343,7 @@ def run_process():
         external_coa_data = pd.read_csv(external_coa_file)
         if 'jaz_sga_name' not in external_coa_data.columns:
             st.error("""
-                Please add a new column “jaz_sga_name” to the external COA file.\n 
+                Please add a new column “jaz_sga_name” to the external COA file\n.
                 In this column, please enter a value from the list below to map to the correct controlled account.
                 
                 **Controlled Accounts**:
