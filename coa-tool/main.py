@@ -343,7 +343,6 @@ def run_process():
 
         for i in range(len(external_coa_data)):
             external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
-        st.write("external coa updated",external_coa_data)
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
@@ -382,6 +381,7 @@ def run_process():
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
                                                                      mapped_external_coa_names)
         st.write("MAPPED TILL NOW",mapped_external_coa_names)
+        st.write("jaz_coa_till_now",jaz_coa_map)
         for p in range(len(external_coa_data)):
             row = external_coa_data.iloc[p]
             if row['*Name'] not in mapped_external_coa_names:
@@ -416,7 +416,6 @@ def run_process():
         #final_df.reset_index(drop=True, inplace=True)
         final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
-        st.write("FOPCSV",final_output_csv)
         instructions = """
         <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
             <div>
