@@ -287,7 +287,6 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
             jaz_coa_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             filtered_df = external_coa_df[external_coa_df['*Name'] == ext_coa_name]
-            st.write(i, ext_coa_name, jaz_coa_name, len(filtered_df))
             if len(filtered_df) > 0 and jaz_coa_name in jaz_coa_map:
                 filtered_row = filtered_df.iloc[0]
                 jaz_coa_map[jaz_coa_name]['Code'] = filtered_row['*Code']
