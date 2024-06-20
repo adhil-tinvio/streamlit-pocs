@@ -426,6 +426,7 @@ def run_process():
 
         st.write("CP5-jaz-coa-map",len(jaz_coa_map))
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
+        st.write("final_df",final_df)
         # Reset the index to move the outer dictionary keys to a column
         #final_df.reset_index(drop=True, inplace=True)
         final_df = final_df[column_order]
