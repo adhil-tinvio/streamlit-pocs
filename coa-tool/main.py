@@ -399,7 +399,7 @@ def run_process():
 
         for key, value in jaz_coa_map.items():
             for elem in ACTIVE_ONLY_ACCOUNTS:
-                if fuzz.ratio(key, elem) > 95:
+                if key and elem and fuzz.ratio(key, elem) > 95:
                     jaz_coa_map[key]['Status'] = 'ACTIVE'
 
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
