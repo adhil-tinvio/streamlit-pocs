@@ -398,9 +398,11 @@ def run_process():
                     jaz_coa_map[account_name]['Currency*'] = ""
 
         for key, value in jaz_coa_map.items():
-            for elem in ACTIVE_ONLY_ACCOUNTS:
-                if key and elem and fuzz.ratio(key, elem) > 95:
-                    jaz_coa_map[key]['Status'] = 'ACTIVE'
+            if key in ACTIVE_ONLY_ACCOUNTS and jaz_coa_map[key]['Status'] == 'INACTIVE':
+                st.write(True,key)
+                jaz_coa_map[key]['Status'] = 'ACTIVE'
+            else:
+                st.write(False,key,"Not Presnt")
 
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         # Reset the index to move the outer dictionary keys to a column
