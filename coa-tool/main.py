@@ -198,7 +198,8 @@ def sga_prompt_generator(chart_of_accounts):
 
     sga_prompt += """
     1) Return only Account Name as response,If there is no close match, name it 'No Suitable Match'.
-    2) The matches must be 1:1, meaning each account name from the list must be paired uniquely with one account from the COA and vice versa. This is very important.
+    2) The matches must be 1:1, meaning each account name from the list must be paired uniquely with 
+    one Account from the Chart of Accounts given and vice versa. (VERY IMPORTANT)
     3) Please do not give them index numbers at all.
     4) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
     5) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
