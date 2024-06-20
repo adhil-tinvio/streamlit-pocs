@@ -412,9 +412,10 @@ def run_process():
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         st.write("final df",final_df)
         # Reset the index to move the outer dictionary keys to a column
-        final_df.reset_index(drop=True, inplace=True)
+        #final_df.reset_index(drop=True, inplace=True)
         final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
+        st.write("FOPCSV",final_output_csv)
         instructions = """
         <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
             <div>
