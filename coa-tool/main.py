@@ -381,9 +381,11 @@ def run_process():
                     mapped_external_coa_names.add(row['*Name'])
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
                                                                      mapped_external_coa_names)
+        st.write("MAPPED TILL NOW",mapped_external_coa_names)
         for p in range(len(external_coa_data)):
             row = external_coa_data.iloc[p]
             if row['*Name'] not in mapped_external_coa_names:
+                st.write("RONAMECHECK",row['*Name'])
                 account_name = row['*Name']
                 account_type = row['*Type']
                 code = row['*Code']
