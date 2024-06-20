@@ -88,6 +88,7 @@ def get_account_type_mapping(external_account_type):
     for key, value in jaz_account_type_mappings.items():
         if fuzz.ratio(key, external_account_type) > 95:
             return value
+
     return f'Not Mapped: {external_account_type}'
 
 
@@ -323,6 +324,7 @@ def run_process():
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_data = pd.read_csv(external_coa_file)
         jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
+        st.write("CSVV",external_coa_data)
         jaz_coa_df_columns = jaz_coa_data.columns
         currency_flag = False
         if 'Currency*' in jaz_coa_df_columns:
