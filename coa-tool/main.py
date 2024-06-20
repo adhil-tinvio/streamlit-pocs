@@ -373,6 +373,8 @@ def run_process():
             if currency_flag:
                 jaz_coa_map[account_name]['Currency*'] = row['Currency*']
 
+        st.write("jaz_coa_map_cp3",jaz_coa_map)
+        st.write("cp3_end")
         for i in range(len(external_coa_data)):
             row = external_coa_data.iloc[i]
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
@@ -385,9 +387,14 @@ def run_process():
                     jaz_coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
                     jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
                     mapped_external_coa_names.add(row['*Name'])
+        st.write("jaz_coa_map_cp2",jaz_coa_map)
+        st.write("cp2_end")
+
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
                                                                      mapped_external_coa_names)
 
+        st.write("jaz_coa_map_cp1",jaz_coa_map)
+        st.write("cp1_end")
         for p in range(len(external_coa_data)):
             row = external_coa_data.iloc[p]
             if row['*Name'] not in mapped_external_coa_names:
