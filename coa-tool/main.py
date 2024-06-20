@@ -399,6 +399,7 @@ def run_process():
 
         for key, value in jaz_coa_map.items():
             if key in ACTIVE_ONLY_ACCOUNTS and jaz_coa_map[key]['Status'] == 'INACTIVE':
+                st.write(key)
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
