@@ -296,7 +296,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
             ext_coa_name = ext_coa_account_names[i]
             mapped_coa_names.add(ext_coa_name)
             filtered_df = external_coa_df[external_coa_df['*Name'] == ext_coa_name]
-            st.write(i, ext_coa_name, jaz_coa_name, len(filtered_df),jaz_account_details[i])
+            st.write(i, ext_coa_name, jaz_coa_name, len(filtered_df))
             gpt_tag = f"GPTN {i}"
             if jaz_coa_name in jaz_coa_map:
                 gpt_tag = f"GPTY {i}"
