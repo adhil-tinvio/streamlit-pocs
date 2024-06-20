@@ -272,6 +272,11 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
             jaz_account_names.append(account_name)
             jaz_account_types.append(account_type)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
+    empty_c = 0
+    for z in range(len(ext_coa_account_names)):
+        if pd.isna(ext_coa_account_names[z]) or ext_coa_account_names[z] == '':
+            empty_c += 0
+    st.write("empty_c_outp", empty_c)
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
     st.write("already_matched_count", count, len(jaz_account_names), len(jaz_account_types),
              "unmapped_external_coa_count", len(ext_coa_account_names), len(ext_coa_account_types))
