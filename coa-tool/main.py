@@ -272,8 +272,10 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
     jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in
                            zip(jaz_account_names, jaz_account_types)]
+    st.write("ext-coa-input",ext_coa_account_names)
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
-    st.write(sga_matches,ext_coa_account_names,"LLMCHECK")
+    if len(sga_matches)!=len(ext_coa_account_names):
+        st.write("check check check",sga_matches,ext_coa_account_names)
     for i in range(len(sga_matches)):
         if validate_sga_match_response(sga_matches[i]):
             jaz_coa_name = sga_matches[i]
