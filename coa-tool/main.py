@@ -280,6 +280,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
                 jaz_coa_map[jaz_coa_name]['Match'] = True
                 jaz_coa_map[jaz_coa_name]['Status'] = 'ACTIVE'
                 jaz_coa_map[jaz_coa_name]['Match Type'] = 'GPT'
+            st.write(jaz_coa_map[jaz_coa_name],jaz_coa_name,"checkname")
     return jaz_coa_map, mapped_coa_names
 
 
