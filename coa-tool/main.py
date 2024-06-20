@@ -261,27 +261,32 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     unmapped_external_coa = external_coa_df[~(external_coa_df['*Name'].isin(mapped_coa_names))]
     jaz_account_names = []
     jaz_account_types = []
-    count=0
+    count = 0
     for i in range(len(jaz_coa_df)):
         account_name = jaz_coa_df.iloc[i]['Name*']
         account_type = jaz_coa_df.iloc[i]['Account Type*']
         if jaz_coa_map[account_name]['Match']:
-            count+=1
+            count += 1
             continue
         else:
             jaz_account_names.append(account_name)
             jaz_account_types.append(account_type)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
-    st.write("already_matched_count",count,len(jaz_account_names),len(jaz_account_types),"unmapped_external_coa_count",len(ext_coa_account_names),len(ext_coa_account_types))
+    st.write("already_matched_count", count, len(jaz_account_names), len(jaz_account_types),
+             "unmapped_external_coa_count", len(ext_coa_account_names), len(ext_coa_account_types))
     jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in
                            zip(jaz_account_names, jaz_account_types)]
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
     if len(sga_matches) != len(ext_coa_account_names):
         st.write("check check check", sga_matches, ext_coa_account_names)
     st.write("ext-coa-input-output-", sga_matches, ext_coa_account_names)
+    sga_conflict_map = defaultdict(int)
     for i in range(len(sga_matches)):
-        if validate_sga_match_response(sga_matches[i]):
+        value = sga_matches[i]
+        sga_conflict_map[value] += 1
+    for i in range(len(sga_matches)):
+        if validate_sga_match_response(sga_matches[i]) and sga_conflict_map[sga_matches[i]] == 1:
             jaz_coa_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             mapped_coa_names.add(ext_coa_name)
@@ -356,7 +361,7 @@ def run_process():
         for i in range(len(external_coa_data)):
             external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
         jaz_coa_map = defaultdict(dict)
-        st.write("CP1-jaz-coa-map",len(jaz_coa_map))
+        st.write("CP1-jaz-coa-map", len(jaz_coa_map))
         mapped_external_coa_names = set()
         for j in range(len(jaz_coa_data)):
             row = jaz_coa_data.iloc[j]
@@ -379,7 +384,7 @@ def run_process():
             if currency_flag:
                 jaz_coa_map[account_name]['Currency*'] = row['Currency*']
 
-        st.write("CP2-jaz-coa-map",len(jaz_coa_map))
+        st.write("CP2-jaz-coa-map", len(jaz_coa_map))
         for i in range(len(external_coa_data)):
             row = external_coa_data.iloc[i]
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
@@ -393,15 +398,15 @@ def run_process():
                     jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
                     mapped_external_coa_names.add(row['*Name'])
 
-        st.write("CP3-jaz-coa-map",len(jaz_coa_map))
+        st.write("CP3-jaz-coa-map", len(jaz_coa_map))
         cp3_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
-        st.write("cp3_df",cp3_df)
+        st.write("cp3_df", cp3_df)
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
                                                                      mapped_external_coa_names)
 
-        st.write("CP4-jaz-coa-map",len(jaz_coa_map))
+        st.write("CP4-jaz-coa-map", len(jaz_coa_map))
         cp4_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
-        st.write("cp4_df",cp4_df)
+        st.write("cp4_df", cp4_df)
         for p in range(len(external_coa_data)):
             row = external_coa_data.iloc[p]
             if row['*Name'] not in mapped_external_coa_names:
@@ -428,9 +433,9 @@ def run_process():
             if key in ACTIVE_ONLY_ACCOUNTS:
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
-        st.write("CP5-jaz-coa-map",len(jaz_coa_map))
+        st.write("CP5-jaz-coa-map", len(jaz_coa_map))
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
-        st.write("final_df",final_df)
+        st.write("final_df", final_df)
         # Reset the index to move the outer dictionary keys to a column
         #final_df.reset_index(drop=True, inplace=True)
         final_df = final_df[column_order]
