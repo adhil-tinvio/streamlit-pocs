@@ -332,78 +332,35 @@ def run_process():
             </div>
         """, unsafe_allow_html=True)
     jaz_coa_file = st.file_uploader("", type=["xlsx"])
-    if external_coa_file is not None and jaz_coa_file is not None:
-        external_coa_data = pd.read_csv(external_coa_file)
-        jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
-        jaz_coa_df_columns = jaz_coa_data.columns
-        currency_flag = False
-        if 'Currency*' in jaz_coa_df_columns:
-            currency_flag = True
-        column_order = []
-        for col in jaz_coa_df_columns:
-            if currency_flag:
-                if col in COLUMNS_WITH_CURRENCY:
-                    column_order.append(col)
-            else:
-                if col in COLUMNS_WITHOUT_CURRENCY:
-                    column_order.append(col)
+    if st.button('Start Processing Files'):
+        if external_coa_file is not None and jaz_coa_file is not None:
+            external_coa_data = pd.read_csv(external_coa_file)
+            jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
+            jaz_coa_df_columns = jaz_coa_data.columns
+            currency_flag = False
+            if 'Currency*' in jaz_coa_df_columns:
+                currency_flag = True
+            column_order = []
+            for col in jaz_coa_df_columns:
+                if currency_flag:
+                    if col in COLUMNS_WITH_CURRENCY:
+                        column_order.append(col)
+                else:
+                    if col in COLUMNS_WITHOUT_CURRENCY:
+                        column_order.append(col)
 
-        for i in range(len(external_coa_data)):
-            external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
-        jaz_coa_map = defaultdict(dict)
-        mapped_external_coa_names = set()
-        for j in range(len(jaz_coa_data)):
-            row = jaz_coa_data.iloc[j]
-            account_name = row['Name*']
-            account_type = row['Account Type*']
-            code = row['Code']
-            description = row['Description']
-            lock_date = row['Lock Date']
-            unique_id = row['Unique ID (do not edit)']
-            jaz_coa_map[account_name] = {
-                "Account Type*": account_type,
-                "Name*": account_name,
-                "Code": code,
-                "Description": description,
-                "Lock Date": lock_date,
-                "Unique ID (do not edit)": unique_id,
-                "Match": False,
-                "Status": "INACTIVE"
-            }
-            if currency_flag:
-                jaz_coa_map[account_name]['Currency*'] = row['Currency*']
-
-        st.write("jaz_coa_map_cp3",jaz_coa_map)
-        st.write("cp3_end")
-        for i in range(len(external_coa_data)):
-            row = external_coa_data.iloc[i]
-            if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
-                continue
-            else:
-                if row['jaz_sga_name'] in jaz_coa_map:
-                    jaz_coa_map[row['jaz_sga_name']]['Code'] = row['*Code']
-                    jaz_coa_map[row['jaz_sga_name']]['Description'] = row['Description']
-                    jaz_coa_map[row['jaz_sga_name']]['Match'] = True
-                    jaz_coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
-                    jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
-                    mapped_external_coa_names.add(row['*Name'])
-        st.write("jaz_coa_map_cp2",jaz_coa_map)
-        st.write("cp2_end")
-
-        jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
-                                                                     mapped_external_coa_names)
-
-        st.write("jaz_coa_map_cp1",jaz_coa_map)
-        st.write("cp1_end")
-        for p in range(len(external_coa_data)):
-            row = external_coa_data.iloc[p]
-            if row['*Name'] not in mapped_external_coa_names:
-                account_name = row['*Name']
-                account_type = row['*Type']
-                code = row['*Code']
+            for i in range(len(external_coa_data)):
+                external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
+            jaz_coa_map = defaultdict(dict)
+            mapped_external_coa_names = set()
+            for j in range(len(jaz_coa_data)):
+                row = jaz_coa_data.iloc[j]
+                account_name = row['Name*']
+                account_type = row['Account Type*']
+                code = row['Code']
                 description = row['Description']
-                lock_date = ""
-                unique_id = ""
+                lock_date = row['Lock Date']
+                unique_id = row['Unique ID (do not edit)']
                 jaz_coa_map[account_name] = {
                     "Account Type*": account_type,
                     "Name*": account_name,
@@ -412,42 +369,86 @@ def run_process():
                     "Lock Date": lock_date,
                     "Unique ID (do not edit)": unique_id,
                     "Match": False,
-                    "Status": "ACTIVE"
+                    "Status": "INACTIVE"
                 }
                 if currency_flag:
-                    jaz_coa_map[account_name]['Currency*'] = ""
+                    jaz_coa_map[account_name]['Currency*'] = row['Currency*']
 
-        for key, value in jaz_coa_map.items():
-            if key in ACTIVE_ONLY_ACCOUNTS:
-                jaz_coa_map[key]['Status'] = 'ACTIVE'
+            st.write("jaz_coa_map_cp3",jaz_coa_map)
+            st.write("cp3_end")
+            for i in range(len(external_coa_data)):
+                row = external_coa_data.iloc[i]
+                if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
+                    continue
+                else:
+                    if row['jaz_sga_name'] in jaz_coa_map:
+                        jaz_coa_map[row['jaz_sga_name']]['Code'] = row['*Code']
+                        jaz_coa_map[row['jaz_sga_name']]['Description'] = row['Description']
+                        jaz_coa_map[row['jaz_sga_name']]['Match'] = True
+                        jaz_coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
+                        jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
+                        mapped_external_coa_names.add(row['*Name'])
+            st.write("jaz_coa_map_cp2",jaz_coa_map)
+            st.write("cp2_end")
 
-        final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
-        # Reset the index to move the outer dictionary keys to a column
-        #final_df.reset_index(drop=True, inplace=True)
-        final_df = final_df[column_order]
-        final_output_csv = convert_df_to_csv(final_df)
-        instructions = """
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
-            <div>
-                <h3 style="text-align: center;">Instructions:</h3>
-                <p style="margin: 4px 0;"><strong>1. Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
-                <p style="margin: 4px 0;"><strong>2. Upload the file to the correct Jaz organization account.</strong></p>
+            jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
+                                                                         mapped_external_coa_names)
+
+            st.write("jaz_coa_map_cp1",jaz_coa_map)
+            st.write("cp1_end")
+            for p in range(len(external_coa_data)):
+                row = external_coa_data.iloc[p]
+                if row['*Name'] not in mapped_external_coa_names:
+                    account_name = row['*Name']
+                    account_type = row['*Type']
+                    code = row['*Code']
+                    description = row['Description']
+                    lock_date = ""
+                    unique_id = ""
+                    jaz_coa_map[account_name] = {
+                        "Account Type*": account_type,
+                        "Name*": account_name,
+                        "Code": code,
+                        "Description": description,
+                        "Lock Date": lock_date,
+                        "Unique ID (do not edit)": unique_id,
+                        "Match": False,
+                        "Status": "ACTIVE"
+                    }
+                    if currency_flag:
+                        jaz_coa_map[account_name]['Currency*'] = ""
+
+            for key, value in jaz_coa_map.items():
+                if key in ACTIVE_ONLY_ACCOUNTS:
+                    jaz_coa_map[key]['Status'] = 'ACTIVE'
+
+            final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
+            # Reset the index to move the outer dictionary keys to a column
+            #final_df.reset_index(drop=True, inplace=True)
+            final_df = final_df[column_order]
+            final_output_csv = convert_df_to_csv(final_df)
+            instructions = """
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
+                <div>
+                    <h3 style="text-align: center;">Instructions:</h3>
+                    <p style="margin: 4px 0;"><strong>1. Copy the spreadsheet data and replace the import file entry sheet.</strong></p>
+                    <p style="margin: 4px 0;"><strong>2. Upload the file to the correct Jaz organization account.</strong></p>
+                </div>
             </div>
-        </div>
-        """
+            """
 
-        # Display the instructions using Streamlit with HTML for center alignment
-        st.markdown(instructions, unsafe_allow_html=True)
-        st.write("")
-        st.write("")
-        col1, col2, col3 = st.columns([17, 10, 17])
-        with col2:
-            st.download_button(
-                label="Download File",
-                data=final_output_csv,
-                file_name='COA_mapped_to_jaz_import.csv',
-                mime='text/csv',
-            )
+            # Display the instructions using Streamlit with HTML for center alignment
+            st.markdown(instructions, unsafe_allow_html=True)
+            st.write("")
+            st.write("")
+            col1, col2, col3 = st.columns([17, 10, 17])
+            with col2:
+                st.download_button(
+                    label="Download File",
+                    data=final_output_csv,
+                    file_name='COA_mapped_to_jaz_import.csv',
+                    mime='text/csv',
+                )
 
 
 if __name__ == '__main__':
