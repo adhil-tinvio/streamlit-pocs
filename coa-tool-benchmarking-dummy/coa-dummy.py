@@ -254,32 +254,34 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_acco
         indices = range(0, len(ext_coa_account_names), batch_size)
         executor.map(process_batch, indices)
 
-    return results,sga_prompt
+    return results, sga_prompt
 
 
 def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_names):
     unmapped_external_coa = external_coa_df[~(external_coa_df['*Name'].isin(mapped_coa_names))]
+    jaz_controlled_account_names = []
     jaz_account_names = []
     jaz_account_types = []
-    count = 0
     for i in range(len(jaz_coa_df)):
+        controlled_account_name = jaz_coa_df.iloc[i]['Controlled Account (do not edit)']
         account_name = jaz_coa_df.iloc[i]['Name*']
         account_type = jaz_coa_df.iloc[i]['Account Type*']
-        if jaz_coa_map[account_name]['Match']:
-            count += 1
+        if controlled_account_name == "" or controlled_account_name is None or jaz_coa_map[account_name]['Match']:
             continue
         else:
-            jaz_account_names.append(account_name)
+            jaz_controlled_account_names.append(controlled_account_name)
             jaz_account_types.append(account_type)
+            jaz_account_names.append(account_name)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
-    jaz_account_details = [f"Account Name: {account_name} - Account Type: {account_type}" for account_name, account_type in
-                           zip(jaz_account_names, jaz_account_types)]
-    sga_matches,prmpt = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
-    st.write("sgprmt",prmpt)
-    st.write("jaz_account_details",jaz_account_details)
-    st.write("coa_account_names",ext_coa_account_names)
-    st.write("coa_account_typees",ext_coa_account_types)
+    jaz_account_details = [f"Account Name: {controlled_account_name} - Account Type: {account_type}"
+                           for controlled_account_name, account_type in
+                           zip(jaz_controlled_account_names, jaz_account_types)]
+    sga_matches, prmpt = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
+    st.write("sgprmt", prmpt)
+    st.write("jaz_account_details", jaz_account_details)
+    st.write("coa_account_names", ext_coa_account_names)
+    st.write("coa_account_typees", ext_coa_account_types)
     if len(sga_matches) != len(ext_coa_account_names):
         return jaz_coa_map, mapped_coa_names
     sga_conflict_map = defaultdict(int)
@@ -288,17 +290,20 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
         sga_conflict_map[value] += 1
     for i in range(len(sga_matches)):
         if validate_sga_match_response(sga_matches[i]) and sga_conflict_map[sga_matches[i]] == 1:
-            jaz_coa_name = sga_matches[i]
+            jaz_coa_controlled_account_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             filtered_df = external_coa_df[external_coa_df['*Name'] == ext_coa_name]
-            if len(filtered_df) > 0 and jaz_coa_name in jaz_coa_map:
+            if len(filtered_df) > 0 and jaz_coa_controlled_account_name in jaz_coa_map:
                 filtered_row = filtered_df.iloc[0]
-                jaz_coa_map[jaz_coa_name]['Code'] = filtered_row['*Code']
-                jaz_coa_map[jaz_coa_name]['Description'] = filtered_row['Description']
-                jaz_coa_map[jaz_coa_name]['Match'] = True
-                jaz_coa_map[jaz_coa_name]['Status'] = 'ACTIVE'
-                jaz_coa_map[jaz_coa_name]['Match Type'] = 'GPT'
-                mapped_coa_names.add(ext_coa_name)
+                for elem, value in jaz_coa_map.items():
+                    if (value['Controlled Account (do not edit)'] is not None and
+                            value['Controlled Account (do not edit)'] == jaz_coa_controlled_account_name):
+                        jaz_coa_map[elem]['Code'] = filtered_row['*Code']
+                        jaz_coa_map[elem]['Description'] = filtered_row['Description']
+                        jaz_coa_map[elem]['Match'] = True
+                        jaz_coa_map[elem]['Status'] = 'ACTIVE'
+                        jaz_coa_map[elem]['Match Type'] = 'GPT'
+                        mapped_coa_names.add(ext_coa_name)
     return jaz_coa_map, mapped_coa_names
 
 
@@ -389,6 +394,7 @@ def run_process():
             description = row['Description']
             lock_date = row['Lock Date']
             unique_id = row['Unique ID (do not edit)']
+            controlled_account = row['Controlled Account (do not edit)']
             jaz_coa_map[account_name] = {
                 "Account Type*": account_type,
                 "Name*": account_name,
@@ -397,7 +403,8 @@ def run_process():
                 "Lock Date": lock_date,
                 "Unique ID (do not edit)": unique_id,
                 "Match": False,
-                "Status": "INACTIVE"
+                "Status": "DELETE",
+                "Controlled Account (do not edit)": controlled_account
             }
             if currency_flag:
                 jaz_coa_map[account_name]['Currency*'] = row['Currency*']
@@ -407,13 +414,15 @@ def run_process():
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
                 continue
             else:
-                if row['jaz_sga_name'] in jaz_coa_map:
-                    jaz_coa_map[row['jaz_sga_name']]['Code'] = row['*Code']
-                    jaz_coa_map[row['jaz_sga_name']]['Description'] = row['Description']
-                    jaz_coa_map[row['jaz_sga_name']]['Match'] = True
-                    jaz_coa_map[row['jaz_sga_name']]['Status'] = 'ACTIVE'
-                    jaz_coa_map[row['jaz_sga_name']]['Match Type'] = 'SGA NAME'
-                    mapped_external_coa_names.add(row['*Name'])
+                for elem, value in jaz_coa_map.items():
+                    if (value['Controlled Account (do not edit)'] is not None and
+                            value['Controlled Account (do not edit)'] == row['jaz_sga_name']):
+                        jaz_coa_map[elem]['Code'] = row['*Code']
+                        jaz_coa_map[elem]['Description'] = row['Description']
+                        jaz_coa_map[elem]['Match'] = True
+                        jaz_coa_map[elem]['Status'] = 'ACTIVE'
+                        jaz_coa_map[elem]['Match Type'] = 'SGA NAME'
+                        mapped_external_coa_names.add(row['*Name'])
 
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
                                                                      mapped_external_coa_names)
@@ -427,6 +436,7 @@ def run_process():
                 description = row['Description']
                 lock_date = ""
                 unique_id = ""
+                controlled_account = ""
                 jaz_coa_map[account_name] = {
                     "Account Type*": account_type,
                     "Name*": account_name,
@@ -435,7 +445,8 @@ def run_process():
                     "Lock Date": lock_date,
                     "Unique ID (do not edit)": unique_id,
                     "Match": False,
-                    "Status": "ACTIVE"
+                    "Status": "ACTIVE",
+                    "Controlled Account (do not edit)": controlled_account
                 }
                 if currency_flag:
                     jaz_coa_map[account_name]['Currency*'] = ""
