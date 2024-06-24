@@ -211,24 +211,23 @@ def sga_prompt_generator(chart_of_accounts):
     return sga_prompt
 
 
-def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, batch_size=15):
+def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size=15):
     headers = {
         'Authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json',
     }
-    results = [None] * len(ext_coa_account_names)
+    results = [None] * len(ext_coa_account_details)
     sga_prompt = sga_prompt_generator(jaz_account_details)
 
     def process_batch(start_index):
-        end_index = min(start_index + batch_size, len(ext_coa_account_names))
-        c_an = ext_coa_account_names[start_index:end_index]
-        c_at = ext_coa_account_types[start_index:end_index]
+        end_index = min(start_index + batch_size, len(ext_coa_account_details))
+        ext_ac = ext_coa_account_details[start_index:end_index]
         messages = [{'role': 'system', 'content': sga_prompt}]
-        for t in range(len(c_an)):
-            messages.append({'role': 'user', 'content': f"Account Name: {c_an[t]} - Account Type:{c_at[t]}"})
+        for t in range(len(ext_ac)):
+            messages.append({'role': 'user', 'content': ext_ac[t]})
 
         data = {
-            "model": "gpt-4-turbo",
+            "model": "gpt-4o",
             "messages": messages,
             "temperature": 0.1,
             "max_tokens": 1000
@@ -242,27 +241,26 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_acco
             content = content.strip("```").strip()
             batch_results = [line.strip() for line in content.split('\n') if line.strip()]
 
-            if len(batch_results) != len(c_an):
-                print("batch: ", c_an)
+            if len(batch_results) != len(ext_ac):
+                print("batch: ", ext_ac)
                 print("batch results: ", batch_results)
-                raise ValueError(f"Expected {len(c_an)} results, but got {len(batch_results)}")
+                raise ValueError(f"Expected {len(ext_ac)} results, but got {len(batch_results)}")
         except (requests.exceptions.RequestException, ValueError, IndexError) as e:
             print(f"Error processing batch: {e}")
-            batch_results = ["Error in classification"] * len(c_an)
+            batch_results = ["Error in classification"] * len(ext_ac)
 
         results[start_index:end_index] = batch_results
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        indices = range(0, len(ext_coa_account_names), batch_size)
+        indices = range(0, len(ext_coa_account_details), batch_size)
         executor.map(process_batch, indices)
 
-    return results, sga_prompt
+    return results
 
 
 def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_names):
     unmapped_external_coa = external_coa_df[~(external_coa_df['*Name'].isin(mapped_coa_names))]
     jaz_controlled_account_names = []
-    jaz_account_names = []
     jaz_account_types = []
     for i in range(len(jaz_coa_df)):
         controlled_account_name = jaz_coa_df.iloc[i]['Controlled Account (do not edit)']
@@ -273,14 +271,16 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
         else:
             jaz_controlled_account_names.append(controlled_account_name)
             jaz_account_types.append(account_type)
-            jaz_account_names.append(account_name)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
-    jaz_account_details = [f"Account Name: {controlled_account_name} - Account Type: {account_type}"
+    jaz_account_details = [f"{{'Account Name': {controlled_account_name} , 'Account Type': {account_type}}}"
                            for controlled_account_name, account_type in
                            zip(jaz_controlled_account_names, jaz_account_types)]
-    sga_matches, prmpt = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
-    st.write("sgprmt", prmpt)
+    ext_coa_account_details=[f"{{'Account Name': {coa_account_name} , 'Account Type': {coa_account_type}}}"
+                             for coa_account_name,coa_account_type in
+                             zip(ext_coa_account_names, ext_coa_account_types)]
+    sga_matches = recommend_sga_match(jaz_account_details,ext_coa_account_details, 15)
+    st.write("sga_op",sga_matches)
     st.write("jaz_account_details", jaz_account_details)
     st.write("coa_account_names", ext_coa_account_names)
     st.write("coa_account_typees", ext_coa_account_types)

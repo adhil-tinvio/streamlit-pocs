@@ -24,6 +24,7 @@ COLUMNS_WITH_CURRENCY = ['Account Type*',
                          'Description',
                          'Lock Date',
                          'Status',
+                         'Controlled Account (do not edit)',
                          'Unique ID (do not edit)']
 
 COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
@@ -32,6 +33,7 @@ COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
                             'Description',
                             'Lock Date',
                             'Status',
+                            'Controlled Account (do not edit)',
                             'Unique ID (do not edit)']
 
 jaz_account_type_mappings = {
@@ -100,135 +102,46 @@ def get_account_type_mapping(external_account_type):
     return f'Not Mapped: {external_account_type}'
 
 
-account_type_prompt = """
-You are a skilled accountant. Determine the closest matching Accepted Account Type for each Account Type or Report Code combination given as input below. 
-If there is no matching type, return an empty value
-
-The accepted account types are:
-1. Asset - Bank Accounts 
-2. Asset - Cash
-3. Asset - Current Asset
-4. Asset - Fixed Asset
-5. Asset - Inventory
-6. Asset - Non-current Asset
-7. Equity - Shareholders Equity
-8. Expense - Direct Costs
-9. Expense - Operating Expense
-10. Expense - Other Expense
-11. Liability - Current Liability
-12. Liability - Non-current Liability
-13. Revenue - Operating Revenue
-14. Revenue - Other Revenue
-
-Only if the account type was not sufficient to determine the correct accepted account type, then use the report code to 
-determine the accepted account type. Here is a help abbreviation glossary that maps to the accepted account types:
-EXP = Expense - Operating Expense
-EQU = Equity - Shareholders Equity
-
-Criteria:
-1) Return only Accepted Account Type from the list above as response. If there is no close match,return ''.
-2) Please do not give them index numbers at all.
-3) Make sure the return list length is exactly the same as the input size length
- (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-4) Please do not have empty lines in your return. The results should all be in the next line 
-(VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-"""
-
-
-def classify_account_types(account_types, report_codes, batch_size=15):
-    headers = {
-        'Authorization': f'Bearer {API_KEY}',
-        'Content-Type': 'application/json',
-    }
-    results = [None] * len(account_types)
-
-    def process_batch(start_index):
-        end_index = min(start_index + batch_size, len(account_types))
-        account_type_batch = account_types[start_index:end_index]
-        report_code_batch = report_codes[start_index:end_index]
-        messages = [{
-            'role': 'system',
-            'content': account_type_prompt
-        }]
-        for i in range(len(account_type_batch)):
-            messages.append({
-                'role': 'user',
-                'content': f"Account Type: {account_type_batch[i]}  Report Code: {report_code_batch}"
-            })
-
-        data = {
-            "model": "gpt-4-turbo",
-            "messages": messages,
-            "temperature": 0.5,
-            "max_tokens": 1000
-        }
-
-        try:
-            response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
-            response.raise_for_status()
-            response_json = response.json()
-            content = response_json['choices'][0]['message']['content']
-            content = content.strip("```").strip()
-            batch_results = [line.strip() for line in content.split('\n')]
-
-            if len(batch_results) != len(account_type_batch):
-                print("batch: ", account_type_batch)
-                print("batch results: ", batch_results)
-                raise ValueError(f"Expected {len(account_type_batch)} results, but got {len(batch_results)}")
-        except (requests.exceptions.RequestException, ValueError, IndexError) as e:
-            print(f"Error processing batch: {e}")
-            batch_results = ["Error in classification"] * len(account_type_batch)
-
-        results[start_index:end_index] = batch_results
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        indices = range(0, len(account_types), batch_size)
-        executor.map(process_batch, indices)
-
-    return results
-
-
 def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
     You are a skilled financial analyst.
     Match the given account names with the most suitable account from the Chart of Accounts given to you.
-    Below is the list of available Chart of Accounts in the format Account Name - Account Type:
-    the input will also be similar format Account Name - Account Type
+    Below is the list of available Chart of Accounts in the format:  {'Account Name','Account Type'}
+    The input will also be similar format {'Account Name','Account Type'}
     """ + "\n- " + "\n- ".join(chart_of_accounts) + "\n"
 
     sga_prompt += """
-    1) Return only Account Name as response,If there is no close match, name it 'No Suitable Match'.
-    2) The matches must be 1:1, meaning each account name from the list must be paired uniquely with 
-    one Account from the Chart of Accounts given and vice versa. (VERY IMPORTANT)
-    3) Please do not give them index numbers at all.
-    4) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
+    1) Return only Account Name as response,If there is no close match,Return ONLY 'No Suitable Match' (VERY IMPORTANT).
+    2) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
+    3) The matches must be 1:1, meaning each Account Name from the list must be paired uniquely with 
+    one Account from the Chart of Accounts given and vice versa (VERY IMPORTANT).
+    4) Please do not give them index numbers at all.
     5) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
-    6) the account types when matched should not be conflicting
+    6) the Account Type when matched should not be conflicting
     """
 
     return sga_prompt
 
 
-def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, batch_size=15):
+def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size=15):
     headers = {
         'Authorization': f'Bearer {API_KEY}',
         'Content-Type': 'application/json',
     }
-    results = [None] * len(ext_coa_account_names)
+    results = [None] * len(ext_coa_account_details)
     sga_prompt = sga_prompt_generator(jaz_account_details)
 
     def process_batch(start_index):
-        end_index = min(start_index + batch_size, len(ext_coa_account_names))
-        c_an = ext_coa_account_names[start_index:end_index]
-        c_at = ext_coa_account_types[start_index:end_index]
+        end_index = min(start_index + batch_size, len(ext_coa_account_details))
+        ext_ac = ext_coa_account_details[start_index:end_index]
         messages = [{'role': 'system', 'content': sga_prompt}]
-        for t in range(len(c_an)):
-            messages.append({'role': 'user', 'content': f"Account Name: {c_an[t]} - Account Type:{c_at[t]}"})
+        for t in range(len(ext_ac)):
+            messages.append({'role': 'user', 'content': ext_ac[t]})
 
         data = {
-            "model": "gpt-4-turbo",
+            "model": "gpt-4o",
             "messages": messages,
-            "temperature": 0.5,
+            "temperature": 0.1,
             "max_tokens": 1000
         }
 
@@ -240,18 +153,18 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_acco
             content = content.strip("```").strip()
             batch_results = [line.strip() for line in content.split('\n') if line.strip()]
 
-            if len(batch_results) != len(c_an):
-                print("batch: ", c_an)
+            if len(batch_results) != len(ext_ac):
+                print("batch: ", ext_ac)
                 print("batch results: ", batch_results)
-                raise ValueError(f"Expected {len(c_an)} results, but got {len(batch_results)}")
+                raise ValueError(f"Expected {len(ext_ac)} results, but got {len(batch_results)}")
         except (requests.exceptions.RequestException, ValueError, IndexError) as e:
             print(f"Error processing batch: {e}")
-            batch_results = ["Error in classification"] * len(c_an)
+            batch_results = ["Error in classification"] * len(ext_ac)
 
         results[start_index:end_index] = batch_results
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        indices = range(0, len(ext_coa_account_names), batch_size)
+        indices = range(0, len(ext_coa_account_details), batch_size)
         executor.map(process_batch, indices)
 
     return results
