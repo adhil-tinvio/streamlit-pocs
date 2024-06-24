@@ -194,18 +194,18 @@ def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
     You are a skilled financial analyst.
     Match the given account names with the most suitable account from the Chart of Accounts given to you.
-    Below is the list of available Chart of Accounts in the format Account Name - Account Type:
-    the input will also be similar format Account Name - Account Type
+    Below is the list of available Chart of Accounts in the format:  {'Account Name','Account Type'}
+    The input will also be similar format {'Account Name','Account Type'}
     """ + "\n- " + "\n- ".join(chart_of_accounts) + "\n"
 
     sga_prompt += """
-    1) Return only Account Name as response,If there is no close match, name it 'No Suitable Match'.
-    2) The matches must be 1:1, meaning each account name from the list must be paired uniquely with 
-    one Account from the Chart of Accounts given and vice versa. (VERY IMPORTANT)
-    3) Please do not give them index numbers at all.
-    4) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
+    1) Return only Account Name as response,If there is no close match,Return ONLY 'No Suitable Match' (VERY IMPORTANT).
+    2) Make sure the return list length is exactly the same as the input size length (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
+    3) The matches must be 1:1, meaning each Account Name from the list must be paired uniquely with 
+    one Account from the Chart of Accounts given and vice versa (VERY IMPORTANT).
+    4) Please do not give them index numbers at all.
     5) Please do not have empty lines in your return. The results should all be in the next line IMPORTANT
-    6) the account types when matched should not be conflicting
+    6) the Account Type when matched should not be conflicting
     """
 
     return sga_prompt
@@ -227,7 +227,7 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size
             messages.append({'role': 'user', 'content': ext_ac[t]})
 
         data = {
-            "model": "gpt-4o",
+            "model": "gpt-4-turbo",
             "messages": messages,
             "temperature": 0.1,
             "max_tokens": 1000
