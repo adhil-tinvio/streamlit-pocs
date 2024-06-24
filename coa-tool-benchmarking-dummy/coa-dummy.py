@@ -266,7 +266,8 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
         controlled_account_name = jaz_coa_df.iloc[i]['Controlled Account (do not edit)']
         account_name = jaz_coa_df.iloc[i]['Name*']
         account_type = jaz_coa_df.iloc[i]['Account Type*']
-        if controlled_account_name == "" or controlled_account_name is None or jaz_coa_map[account_name]['Match']:
+        if (controlled_account_name == "" or controlled_account_name is None
+                or jaz_coa_map[account_name]['Match'] or pd.isna(controlled_account_name)):
             continue
         else:
             jaz_controlled_account_names.append(controlled_account_name)
