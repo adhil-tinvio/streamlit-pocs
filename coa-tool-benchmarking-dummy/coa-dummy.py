@@ -7,6 +7,7 @@ from fuzzywuzzy import fuzz
 
 API_KEY = st.secrets["API_KEY"]
 ACTIVE_ONLY_ACCOUNTS = ['Input GST Receivable',
+                        'Input GST Payable',
                         'Accounts Payable',
                         'FX Realized Currency (Gains)/Loss',
                         'FX Unrealized Currency (Gains)/Loss',
