@@ -303,7 +303,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
             jaz_coa_controlled_account_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             filtered_df = external_coa_df[external_coa_df['*Name'] == ext_coa_name]
-            if len(filtered_df) > 0 and jaz_coa_controlled_account_name in jaz_coa_map:
+            if len(filtered_df) > 0:
                 filtered_row = filtered_df.iloc[0]
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
