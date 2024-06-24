@@ -24,6 +24,7 @@ COLUMNS_WITH_CURRENCY = ['Account Type*',
                          'Description',
                          'Lock Date',
                          'Status',
+                         'Controlled Account (do not edit)',
                          'Unique ID (do not edit)']
 
 COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
@@ -32,6 +33,7 @@ COLUMNS_WITHOUT_CURRENCY = ['Account Type*',
                             'Description',
                             'Lock Date',
                             'Status',
+                            'Controlled Account (do not edit)',
                             'Unique ID (do not edit)']
 
 jaz_account_type_mappings = {
