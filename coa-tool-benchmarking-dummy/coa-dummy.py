@@ -300,6 +300,8 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
                             value['Controlled Account (do not edit)'] == jaz_coa_controlled_account_name):
+                        jaz_coa_map[elem]['Name*'] = filtered_row['*Name']
+                        jaz_coa_map[elem]['Account Type*'] = filtered_row['*Type']
                         jaz_coa_map[elem]['Code'] = filtered_row['*Code']
                         jaz_coa_map[elem]['Description'] = filtered_row['Description']
                         jaz_coa_map[elem]['Match'] = True
@@ -419,6 +421,8 @@ def run_process():
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
                             value['Controlled Account (do not edit)'] == row['jaz_sga_name']):
+                        jaz_coa_map[elem]['Name*'] = row['*Name']
+                        jaz_coa_map[elem]['Account Type*'] = row['*Type']
                         jaz_coa_map[elem]['Code'] = row['*Code']
                         jaz_coa_map[elem]['Description'] = row['Description']
                         jaz_coa_map[elem]['Match'] = True
