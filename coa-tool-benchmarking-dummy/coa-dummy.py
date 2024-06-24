@@ -227,7 +227,7 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size
             messages.append({'role': 'user', 'content': ext_ac[t]})
 
         data = {
-            "model": "gpt-4-turbo",
+            "model": "gpt-4o",
             "messages": messages,
             "temperature": 0.1,
             "max_tokens": 1000
