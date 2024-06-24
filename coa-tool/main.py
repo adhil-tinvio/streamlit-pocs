@@ -188,7 +188,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
                 or jaz_coa_map[account_name]['Match'] or pd.isna(controlled_account_name)):
             continue
         else:
-            jaz_controlled_account_names.append(account_name)
+            jaz_controlled_account_names.append(controlled_account_name)
             jaz_account_types.append(account_type)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
