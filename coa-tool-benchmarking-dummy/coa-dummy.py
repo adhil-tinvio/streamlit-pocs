@@ -228,7 +228,7 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_acco
         data = {
             "model": "gpt-4-turbo",
             "messages": messages,
-            "temperature": 0.5,
+            "temperature": 0.1,
             "max_tokens": 1000
         }
 
@@ -273,7 +273,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
             jaz_account_types.append(account_type)
     ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
-    jaz_account_details = [f"{account_name} - {account_type}" for account_name, account_type in
+    jaz_account_details = [f"Account Name: {account_name} - Account Type: {account_type}" for account_name, account_type in
                            zip(jaz_account_names, jaz_account_types)]
     sga_matches,prmpt = recommend_sga_match(jaz_account_details, ext_coa_account_names, ext_coa_account_types, 15)
     st.write("sgprmt",prmpt)
