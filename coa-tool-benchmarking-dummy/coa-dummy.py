@@ -469,6 +469,7 @@ def run_process():
             if value['Controlled Account (do not edit)'] in ACTIVE_ONLY_ACCOUNTS:
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
+        st.write("JCOAFM",jaz_coa_map)
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
