@@ -280,7 +280,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     ext_coa_account_details=[f"{{'Account Name': {coa_account_name} , 'Account Type': {coa_account_type}}}"
                              for coa_account_name,coa_account_type in
                              zip(ext_coa_account_names, ext_coa_account_types)]
-    sga_matches = recommend_sga_match(jaz_account_details,ext_coa_account_details, 15)
+    sga_matches = recommend_sga_match(jaz_account_details,ext_coa_account_details, 10)
     st.write("sga_op",sga_matches)
     st.write("jaz_account_details", jaz_account_details)
     st.write("ext_coa_account_details",ext_coa_account_details)
