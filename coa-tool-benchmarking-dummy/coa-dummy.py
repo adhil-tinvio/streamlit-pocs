@@ -15,6 +15,7 @@ ACTIVE_ONLY_ACCOUNTS = ['FX Realized Currency (Gains)/Loss',
                         'FX Rounding (Gains)/Loss',
                         'Accounts Receivable',
                         'Retained Earnings',
+                        'Input VAT Receivable'
                         'Output VAT Payable']
 
 COLUMNS_WITH_CURRENCY = ['Account Type*',
