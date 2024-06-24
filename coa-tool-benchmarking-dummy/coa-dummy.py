@@ -283,6 +283,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     sga_matches = recommend_sga_match(jaz_account_details,ext_coa_account_details, 15)
     st.write("sga_op",sga_matches)
     st.write("jaz_account_details", jaz_account_details)
+    st.write("ext_coa_account_details",ext_coa_account_details)
     st.write("coa_account_names", ext_coa_account_names)
     st.write("coa_account_typees", ext_coa_account_types)
     if len(sga_matches) != len(ext_coa_account_names):
