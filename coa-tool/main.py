@@ -404,7 +404,7 @@ def run_process():
 
         for p in range(len(external_coa_df)):
             row = external_coa_df.iloc[p]
-            if row['*Name'] not in mapped_external_coa_names:
+            if row['Name'] not in mapped_external_coa_names:
                 account_name = row['Name']
                 account_type = row['Type']
                 code = ""
