@@ -406,20 +406,14 @@ def run_process():
     )
 
     st.markdown("""
-### COA External File Guidelines
-
-The COA external_file should have the full list of accounts you want for the organization account.  
-The external_file must have the following columns: **jaz_controlled_account**, **account name**, **account type**.  
-*Code* and *description* columns are optional, but will be mapped if available.
-
-**Steps to Use the Tool:**
-1. Download the organization’s Jaz COA import_file and the external_file.
-2. Upload both files using the upload feature in this tool.
-3. Accounts in the external_file will be matched by AI to those in the import_file. If they match, duplicates will be removed.
-4. Accounts in the external_file that are not matched will be created as new account rows in the import template.
-5. Accounts in the import_file that do not have a match in the external_file will be set as deleted in the import template.
-
-For any questions or issues, please contact [coa-help@jaz.ai](mailto:coa-help@jaz.ai).
+The COA external_file should have the full list of accounts you want for the organization account
+The external_file must have the following columns: jaz_controlled_account, account name, account type
+Code and description columns are optional, but will be mapped if available
+Download the organization’s Jaz COA import_file and upload both files in this tool
+Accounts in the external_file will be matched by AI to those in the import_file. If they match, duplicates will be removed
+Accounts in the external_file that are not matched, they will be created as new account rows in the import template
+Accounts in the import_file that do not have a match on external_file, will be set as deleted in the import template
+If you’ve any questions or issues, contact coa-help@jaz.ai
 """)
 
     st.write("")
