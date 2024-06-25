@@ -443,6 +443,7 @@ def run_process():
                 """)
             st.stop()
 
+        st.write("before",external_coa_df)
         external_coa_df.rename(columns={name_column: 'Name'}, inplace=True)
         external_coa_df.rename(columns={type_column: 'Type'}, inplace=True)
         code_flag = code_column is not None
