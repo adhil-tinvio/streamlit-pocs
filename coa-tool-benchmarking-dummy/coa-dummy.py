@@ -466,7 +466,7 @@ def run_process():
                 if col in COLUMNS_WITHOUT_CURRENCY:
                     column_order.append(col)
 
-        st.write("external coa df",external_coa_df)
+        st.write("external coa df",external_coa_df,len(external_coa_df))
         for i in range(len(external_coa_df)):
             external_coa_df.at[i, 'Type'] = get_account_type_mapping(external_coa_df.iloc[i]['Type'])
         jaz_coa_map = defaultdict(dict)
