@@ -318,7 +318,6 @@ def run_process():
                 <h1 style='font-size: 20px; font-weight: bold;'>Please upload External COA File</h1>
             </div>
         """, unsafe_allow_html=True)
-    st.write("")
     external_coa_file = st.file_uploader("", type=["csv"])
     st.write("")
     st.write("")
