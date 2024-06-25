@@ -434,13 +434,13 @@ def run_process():
             st.stop()
         elif name_column is None:
             st.error("""
-            Unable to detect the "Account Name" column in the External COA file. 
+            Unable to detect the Account Name column in the External COA file. 
             Please update the column name to 'Name' and re-upload the file.
             """)
             st.stop()
         elif type_column is None:
             st.error("""
-            Unable to detect the "Account Type" column in the External COA file. 
+            Unable to detect the Account Type column in the External COA file. 
             Please update the column name to 'Type' and re-upload the file.
                 """)
             st.stop()
