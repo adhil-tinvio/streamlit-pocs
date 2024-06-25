@@ -407,7 +407,7 @@ def run_process():
 
     instruction_block = """
     <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 22px; text-align: left;">
-        <div style="width: 100%;">
+        <div style="width: 120%;">
             <h3 style="text-align: center;">Guidelines:</h3>
             <p style="margin: 2px 0;">1. The COA external_file should have the full list of accounts you want for the 
             organization account.</p>
