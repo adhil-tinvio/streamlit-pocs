@@ -409,6 +409,10 @@ def run_process():
     <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
         <div style="width: 100%;">
             <h3 style="text-align: center;">Guidelines:</h3>
+                    <div style="margin-bottom: 8px;">
+            <span style="font-weight: bold;">1. </span>
+            <span>The COA external_file should have the full list of accounts you want for the organization account.</span>
+        </div>
             <p style="margin: 2px 0;font-size: 20px; display:inline">1. The COA external_file should have the full list of accounts you want for the 
             organization account.</p>
             <p style="margin: 2px 0;font-size: 16px; display: inline-block">2. The external_file must have the following columns: <strong>jaz_controlled_account
