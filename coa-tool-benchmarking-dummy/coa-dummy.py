@@ -452,6 +452,8 @@ def run_process():
         if desc_flag:
             external_coa_df.rename(columns={description_column: 'Description'}, inplace=True)
 
+        st.write("external coa df CP@",external_coa_df)
+
         jaz_coa_df = pd.read_excel(jaz_coa_file, sheet_name=1)
         jaz_coa_df_columns = jaz_coa_df.columns
         currency_flag = False
