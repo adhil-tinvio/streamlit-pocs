@@ -266,7 +266,7 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size
 
 
 def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_names, code_flag, desc_flag):
-    unmapped_external_coa = external_coa_df[~(external_coa_df['*Name'].isin(mapped_coa_names))]
+    unmapped_external_coa = external_coa_df[~(external_coa_df['Name'].isin(mapped_coa_names))]
     jaz_controlled_account_names = []
     jaz_account_types = []
     for i in range(len(jaz_coa_df)):
