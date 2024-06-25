@@ -385,14 +385,14 @@ def run_process():
 
     guideline_block = """
             <h5 style="text-align: center;">Guidelines:</h5>
-            <h6 style="margin-bottom: 0;">Steps:</h6>            
+            <h5 style="margin-bottom: 0;">Steps:</h5>            
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">1. The COA external_file should have the full list of accounts you want for the organization </p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">2. The external_file must have the following columns: <strong>jaz_controlled_account
             </strong>,<strong>account name</strong>,<strong>account type</strong></p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">3. <strong>Code</strong> and <strong>Description</strong> columns are optional, but will be mapped if available</p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">4. Download the organization’s Jaz COA import_file and upload both files in this tool</p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">5. Download the newly generated file and copy it over into the Jaz COA import_file worksheet for upload into Jaz!</p>
-            <h5 style="margin-bottom: 10;">How It Works:</h5>            
+            <h5 style="margin-bottom: 0;">How It Works:</h5>            
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">• Accounts in the external_file will be matched by AI to those in the import_file.
              If they match, duplicates will be removed</p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">• Accounts in the external_file that are not matched 
