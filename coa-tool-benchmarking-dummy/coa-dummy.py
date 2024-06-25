@@ -451,7 +451,7 @@ def run_process():
             external_coa_df.rename(columns={'jaz_controlled_account': 'jaz_sga_name'}, inplace=True)
         if 'jaz_sga_name' not in external_coa_df.columns:
             st.error("""
-                Please add a new column “jaz_sga_name” to the external COA file.\t
+                Please add a new column “jaz_controlled_account” to the external COA file.\t
                 In this column, please enter a value from the list below to map to the correct controlled account.
                 
                 **Controlled Accounts**:
