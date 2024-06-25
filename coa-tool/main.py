@@ -293,18 +293,18 @@ def run_process():
     <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
         <div style="width: 100%;">
             <h3 style="text-align: center;">Guidelines:</h3>
-            <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">1. The COA external_file should have the full list of accounts you want for the organization account.</p>
+            <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">1. The COA external_file should have the full list of accounts you want for the organization account</p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">2. The external_file must have the following columns: <strong>jaz_controlled_account
-            </strong>,<strong>account name</strong>,<strong>account type</strong>.</p>
-            <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">3. Code and description columns are optional, but will be mapped if available.</p>
-            <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">4. Download the organization’s Jaz COA import_file and upload both files in this tool.</p>
-            <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">5. Accounts in the external_file will be matched by AI to those in the import_file.
-             If they match, duplicates will be removed.</p>
+            </strong>,<strong>account name</strong>,<strong>account type</strong></p>
+            <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">3. Code and description columns are optional, but will be mapped if available</p>
+            <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">4. Download the organization’s Jaz COA import_file and upload both files in this tool</p>
+            <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">5. Accounts in the external_file will be matched by AI to those in the import_file
+             If they match, duplicates will be removed</p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">6. Accounts in the external_file that are not matched 
-            will be created as new account rows in the import template.</p>
+            will be created as new account rows in the import template</p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">7. Accounts in the import_file that do not have a match on external_file 
-            will be set as deleted in the import template.</p>
-            <p style="margin: 2px 0;font-size: 16px">If you have any questions or issues, contact <a href="mailto:coa-help@jaz.ai">coa-help@jaz.ai</a>.</p>
+            will be set as deleted in the import template</p>
+            <p style="margin: 2px 0;font-size: 16px">8. If you have any questions or issues, contact <a href="mailto:coa-help@jaz.ai">coa-help@jaz.ai</a></p>
         </div>
     </div>
     """
