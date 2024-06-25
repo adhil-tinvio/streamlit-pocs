@@ -443,6 +443,7 @@ def run_process():
                 """)
             st.stop()
 
+        st.write("colop",name_column,type_column,code_column,description_column)
         st.write("before",external_coa_df)
         external_coa_df.rename(columns={name_column: 'Name'}, inplace=True)
         external_coa_df.rename(columns={type_column: 'Type'}, inplace=True)
