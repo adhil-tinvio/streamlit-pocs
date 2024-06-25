@@ -304,7 +304,7 @@ def run_process():
             will be created as new account rows in the import template</p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">7. Accounts in the import_file that do not have a match on external_file 
             will be set as deleted in the import template</p>
-            <p style="margin: 2px 0;font-size: 16px">8. If you have any questions or need support,contact <a href="mailto:coa-help@jaz.ai">coa-help@jaz.ai</a></p>
+            <p style="margin: 2px 0;font-size: 16px">8. If you have any questions or need support, contact <a href="mailto:coa-help@jaz.ai">coa-help@jaz.ai</a></p>
         </div>
     </div>
     """
