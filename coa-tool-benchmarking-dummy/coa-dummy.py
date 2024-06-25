@@ -409,7 +409,7 @@ def run_process():
     <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
         <div style="width: 60%;">
             <h3 style="text-align: center;">Instructions:</h3>
-            <ul style="list-style-type: none; padding: 0;">
+            <ol>
                 <li><strong>The COA external_file should have the full list of accounts you want for the organization account.</strong></li>
                 <li><strong>The external_file must have the following columns: jaz_controlled_account, account name, account type.</strong></li>
                 <li>Code and description columns are optional, but will be mapped if available.</li>
@@ -417,7 +417,7 @@ def run_process():
                 <li>Accounts in the external_file will be matched by AI to those in the import_file. If they match, duplicates will be removed.</li>
                 <li>Accounts in the external_file that are not matched will be created as new account rows in the import template.</li>
                 <li>Accounts in the import_file that do not have a match on external_file will be set as deleted in the import template.</li>
-            </ul>
+            </ol>
             <p>If you have any questions or issues, contact <a href="mailto:coa-help@jaz.ai">coa-help@jaz.ai</a>.</p>
         </div>
     </div>
