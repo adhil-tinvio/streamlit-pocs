@@ -428,19 +428,19 @@ def run_process():
         name_column, type_column, code_column, description_column = update_external_coa_column_names(external_coa_df)
         if name_column is None and type_column is None:
             st.error("""
-            Unable to detect the Account Name and Account Type column in the External COA file. 
+            Unable to detect the  Account Name  and  Account Type  column in the External COA file.\t 
             Please update the column name to 'Name' and 'Type' respectively and re-upload the file.
                 """)
             st.stop()
         elif name_column is None:
             st.error("""
-            Unable to detect the Account Name column in the External COA file. 
+            Unable to detect the  Account Name  column in the External COA file.\t
             Please update the column name to 'Name' and re-upload the file.
             """)
             st.stop()
         elif type_column is None:
             st.error("""
-            Unable to detect the Account Type column in the External COA file. 
+            Unable to detect the  Account Type  column in the External COA file.\t
             Please update the column name to 'Type' and re-upload the file.
                 """)
             st.stop()
