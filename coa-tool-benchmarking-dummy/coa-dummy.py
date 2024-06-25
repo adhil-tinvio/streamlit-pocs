@@ -387,7 +387,7 @@ def run_process():
     <h3 style="text-align: center;">Guidelines:</h3>
     
     <h5>Steps:</h5>
-    <p style="margin: 8px 0; white-space: nowrap;">1.⚫ The COA external_file should have the full list of accounts you want for the organization.</p>
+    <p style="margin: 8px 0; white-space: nowrap;">1.⚫ • The COA external_file should have the full list of accounts you want for the organization.</p>
     <p style="margin: 8px 0; white-space: nowrap;">2. The external_file must have the following columns: jaz_controlled_account, account name, account type.</p>
     <p style="margin: 8px 0; white-space: nowrap;">3. Code and Description columns are optional, but will be mapped if available.</p>
     <p style="margin: 8px 0; white-space: nowrap;">4. Download the organization’s COA import_file from Jaz and upload both files in this tool.</p>
