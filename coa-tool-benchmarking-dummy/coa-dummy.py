@@ -384,8 +384,6 @@ def run_process():
     )
 
     guideline_block = """
-    <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 18px; text-align: left;">
-        <div style="width: 100%;">
             <h5 style="text-align: center;">Guidelines:</h5>
             <h6 style="margin-bottom: 0;">Steps:</h6>            
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">1. The COA external_file should have the full list of accounts you want for the organization </p>
@@ -402,8 +400,6 @@ def run_process():
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">• Accounts in the import_file that do not have a match on external_file 
             will be set as deleted in the import template</p>
             <p style="margin: 2px 0;font-size: 16px">• If you have any questions or need support, contact <a href="mailto:coa-help@jaz.ai">coa-help@jaz.ai</a></p>
-        </div>
-    </div>
     """
 
     st.markdown(guideline_block, unsafe_allow_html=True)
