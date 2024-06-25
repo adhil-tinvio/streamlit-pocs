@@ -406,7 +406,7 @@ def run_process():
     )
 
     instruction_block = """
-    <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 20px; text-align: left;">
+    <div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 16px; text-align: left;">
         <div style="width: 100%;">
             <h3 style="text-align: center;">Guidelines:</h3>
             <p style="margin: 2px 0;">1. The COA external_file should have the full list of accounts you want for the 
