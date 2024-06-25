@@ -5,6 +5,8 @@ import concurrent.futures
 from collections import defaultdict
 from fuzzywuzzy import fuzz
 import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 API_KEY = st.secrets["API_KEY"]
 ACTIVE_ONLY_ACCOUNTS = ['Input GST Receivable',
@@ -285,7 +287,7 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
                            for controlled_account_name, account_type in
                            zip(jaz_controlled_account_names, jaz_account_types)]
     ext_coa_account_details = [f"{{'Account Name': {coa_account_name} , 'Account Type': {coa_account_type}}}"
-                               for coa_account_name,coa_account_type in
+                               for coa_account_name, coa_account_type in
                                zip(ext_coa_account_names, ext_coa_account_types)]
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_details, 10)
     st.write("sga_op", sga_matches)
@@ -348,6 +350,22 @@ def contains_substring(substring, text):
     return bool(match)
 
 
+def calculate_cosine_similarity(text1, text2):
+    # Example documents
+    documents = [text1, text2]
+
+    # Initialize TF-IDF Vectorizer
+    vectorizer = TfidfVectorizer()
+
+    # Fit and transform documents to TF-IDF vectors
+    tfidf_matrix = vectorizer.fit_transform(documents)
+
+    # Compute cosine similarity between the two TF-IDF vectors
+    similarity = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1])[0][0]*100
+
+    return similarity
+
+
 def update_external_coa_column_names(external_coa_df):
     external_coa_columns = external_coa_df.columns
     name_column = None
@@ -357,13 +375,13 @@ def update_external_coa_column_names(external_coa_df):
     for i in range(len(external_coa_columns)):
         if external_coa_columns[i] == 'jaz_sga_name':
             continue
-        if fuzz.ratio("Name", external_coa_columns[i]) >= 70:
+        if calculate_cosine_similarity("Account Name", external_coa_columns[i]) >= 50:
             name_column = external_coa_columns[i]
-        elif fuzz.ratio("Type", external_coa_columns[i]) >= 70:
+        elif calculate_cosine_similarity("Account Type", external_coa_columns[i]) >= 50:
             type_column = external_coa_columns[i]
-        elif fuzz.ratio("Code", external_coa_columns[i]) >= 70:
+        elif calculate_cosine_similarity("Code", external_coa_columns[i]) >= 50:
             code_column = external_coa_columns[i]
-        elif fuzz.ratio("Description", external_coa_columns[i]) >= 70:
+        elif calculate_cosine_similarity("Description", external_coa_columns[i]) >= 50:
             description_column = external_coa_columns[i]
     return name_column, type_column, code_column, description_column
 
@@ -387,6 +405,23 @@ def run_process():
         unsafe_allow_html=True
     )
 
+    st.markdown("""
+### COA External File Guidelines
+
+The COA external_file should have the full list of accounts you want for the organization account.  
+The external_file must have the following columns: **jaz_controlled_account**, **account name**, **account type**.  
+*Code* and *description* columns are optional, but will be mapped if available.
+
+**Steps to Use the Tool:**
+1. Download the organization’s Jaz COA import_file and the external_file.
+2. Upload both files using the upload feature in this tool.
+3. Accounts in the external_file will be matched by AI to those in the import_file. If they match, duplicates will be removed.
+4. Accounts in the external_file that are not matched will be created as new account rows in the import template.
+5. Accounts in the import_file that do not have a match in the external_file will be set as deleted in the import template.
+
+For any questions or issues, please contact [coa-help@jaz.ai](mailto:coa-help@jaz.ai).
+""")
+
     st.write("")
     st.write("")
     st.markdown("""
@@ -407,6 +442,8 @@ def run_process():
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_df = pd.read_csv(external_coa_file)
         st.write("external cols", external_coa_df.columns)
+        if 'jaz_controlled_account' in external_coa_df.columns:
+            external_coa_df.rename(columns={'jaz_controlled_account': 'jaz_sga_name'}, inplace=True)
         if 'jaz_sga_name' not in external_coa_df.columns:
             st.error("""
                 Please add a new column “jaz_sga_name” to the external COA file.\t
