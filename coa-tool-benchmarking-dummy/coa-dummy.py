@@ -279,8 +279,8 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
         else:
             jaz_controlled_account_names.append(controlled_account_name)
             jaz_account_types.append(account_type)
-    ext_coa_account_names = unmapped_external_coa['*Name'].tolist()
-    ext_coa_account_types = unmapped_external_coa['*Type'].tolist()
+    ext_coa_account_names = unmapped_external_coa['Name'].tolist()
+    ext_coa_account_types = unmapped_external_coa['Type'].tolist()
     jaz_account_details = [f"{{'Account Name': {controlled_account_name} , 'Account Type': {account_type}}}"
                            for controlled_account_name, account_type in
                            zip(jaz_controlled_account_names, jaz_account_types)]
