@@ -355,13 +355,15 @@ def update_external_coa_column_names(external_coa_df):
     code_column = None
     description_column = None
     for i in range(len(external_coa_columns)):
-        if contains_substring("Name", external_coa_columns[i]):
+        if external_coa_columns[i] == 'jaz_sga_name':
+            continue
+        if fuzz.ratio("Name", external_coa_columns[i]) >= 70:
             name_column = external_coa_columns[i]
-        elif contains_substring("Type", external_coa_columns[i]):
+        elif fuzz.ratio("Type", external_coa_columns[i]) >= 70:
             type_column = external_coa_columns[i]
-        elif contains_substring("Code", external_coa_columns[i]):
+        elif fuzz.ratio("Code", external_coa_columns[i]) >= 70:
             code_column = external_coa_columns[i]
-        elif contains_substring("Description", external_coa_columns[i]):
+        elif fuzz.ratio("Description", external_coa_columns[i]) >= 70:
             description_column = external_coa_columns[i]
     return name_column, type_column, code_column, description_column
 
@@ -443,8 +445,8 @@ def run_process():
                 """)
             st.stop()
 
-        st.write("colop",name_column,type_column,code_column,description_column)
-        st.write("before",external_coa_df)
+        st.write("colop", name_column, type_column, code_column, description_column)
+        st.write("before", external_coa_df)
         external_coa_df.rename(columns={name_column: 'Name'}, inplace=True)
         external_coa_df.rename(columns={type_column: 'Type'}, inplace=True)
         code_flag = code_column is not None
@@ -454,7 +456,7 @@ def run_process():
         if desc_flag:
             external_coa_df.rename(columns={description_column: 'Description'}, inplace=True)
 
-        st.write("external coa df CP@",external_coa_df)
+        st.write("external coa df CP@", external_coa_df)
 
         jaz_coa_df = pd.read_excel(jaz_coa_file, sheet_name=1)
         jaz_coa_df_columns = jaz_coa_df.columns
@@ -470,7 +472,7 @@ def run_process():
                 if col in COLUMNS_WITHOUT_CURRENCY:
                     column_order.append(col)
 
-        st.write("external coa df",external_coa_df,len(external_coa_df))
+        st.write("external coa df", external_coa_df, len(external_coa_df))
         for i in range(len(external_coa_df)):
             external_coa_df.at[i, 'Type'] = get_account_type_mapping(external_coa_df.iloc[i]['Type'])
         jaz_coa_map = defaultdict(dict)
