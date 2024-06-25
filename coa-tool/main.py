@@ -290,7 +290,6 @@ def run_process():
     )
 
     guideline_block = """
-            <h4 style="text-align: center;">Guidelines:</h4>
             <h5 style="margin-bottom: 0; margin-top: 0;">Steps:</h5>            
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">1. The COA external_file should have the full list of accounts you want for the organization </p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">2. The external_file must have the following columns: <strong>jaz_controlled_account
