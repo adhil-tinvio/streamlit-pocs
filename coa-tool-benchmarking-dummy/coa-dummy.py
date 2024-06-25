@@ -4,7 +4,6 @@ import requests
 import concurrent.futures
 from collections import defaultdict
 from fuzzywuzzy import fuzz
-import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -328,28 +327,6 @@ def convert_df_to_csv(df):
     csv_df = df.to_csv(index=False, encoding='utf-8')
     return csv_df
 
-
-def contains_substring(substring, text):
-    """
-    This function checks if the given text contains the specified substring.
-
-    Args:
-    text (str): The text to search within.
-    substring (str): The substring to search for.
-
-    Returns:
-    bool: True if the substring is found in the text, False otherwise.
-    """
-    # Escape the substring to handle special regex characters
-    pattern = re.escape(substring)
-
-    # Search for the pattern in the text
-    match = re.search(pattern, text, re.IGNORECASE)  # Adding re.IGNORECASE for case insensitive match
-
-    # Return True if a match is found, otherwise False
-    return bool(match)
-
-
 def calculate_cosine_similarity(text1, text2):
     # Example documents
     documents = [text1, text2]
@@ -446,7 +423,6 @@ def run_process():
     jaz_coa_file = st.file_uploader("", type=["xlsx"])
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_df = pd.read_csv(external_coa_file)
-        st.write("external cols", external_coa_df.columns)
         if 'jaz_controlled_account' in external_coa_df.columns:
             external_coa_df.rename(columns={'jaz_controlled_account': 'jaz_sga_name'}, inplace=True)
         if 'jaz_sga_name' not in external_coa_df.columns:
@@ -487,8 +463,6 @@ def run_process():
                 """)
             st.stop()
 
-        st.write("colop", name_column, type_column, code_column, description_column)
-        st.write("before", external_coa_df)
         external_coa_df.rename(columns={name_column: 'Name'}, inplace=True)
         external_coa_df.rename(columns={type_column: 'Type'}, inplace=True)
         code_flag = code_column is not None
@@ -498,7 +472,6 @@ def run_process():
         if desc_flag:
             external_coa_df.rename(columns={description_column: 'Description'}, inplace=True)
 
-        st.write("external coa df CP@", external_coa_df)
         external_coa_df = external_coa_df.dropna(subset=['Name', 'Type'])
         jaz_coa_df = pd.read_excel(jaz_coa_file, sheet_name=1)
         jaz_coa_df_columns = jaz_coa_df.columns
@@ -514,7 +487,6 @@ def run_process():
                 if col in COLUMNS_WITHOUT_CURRENCY:
                     column_order.append(col)
 
-        st.write("external coa df", external_coa_df, len(external_coa_df))
         for i in range(len(external_coa_df)):
             external_coa_df.at[i, 'Type'] = get_account_type_mapping(external_coa_df.iloc[i]['Type'])
         jaz_coa_map = defaultdict(dict)
@@ -562,7 +534,7 @@ def run_process():
                         mapped_external_coa_names.add(row['Name'])
 
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map,
-                                                                     mapped_external_coa_names, code_flag, desc_flag)
+                                                                     mapped_external_coa_names,code_flag,desc_flag)
 
         for p in range(len(external_coa_df)):
             row = external_coa_df.iloc[p]
@@ -596,7 +568,6 @@ def run_process():
             if value['Controlled Account (do not edit)'] in ACTIVE_ONLY_ACCOUNTS:
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
-        st.write("JCOAFM", jaz_coa_map)
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
