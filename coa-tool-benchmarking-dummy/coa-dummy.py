@@ -362,6 +362,7 @@ def run_process():
     jaz_coa_file = st.file_uploader("", type=["xlsx"])
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_data = pd.read_csv(external_coa_file)
+        st.write("external cols",external_coa_data.columns)
         if 'jaz_sga_name' not in external_coa_data.columns:
             st.error("""
                 Please add a new column “jaz_sga_name” to the external COA file.\t
