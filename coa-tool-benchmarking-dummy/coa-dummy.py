@@ -4,6 +4,7 @@ import requests
 import concurrent.futures
 from collections import defaultdict
 from fuzzywuzzy import fuzz
+import re
 
 API_KEY = st.secrets["API_KEY"]
 ACTIVE_ONLY_ACCOUNTS = ['Input GST Receivable',
@@ -264,7 +265,7 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size
     return results
 
 
-def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_names):
+def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_names, code_flag, desc_flag):
     unmapped_external_coa = external_coa_df[~(external_coa_df['*Name'].isin(mapped_coa_names))]
     jaz_controlled_account_names = []
     jaz_account_types = []
@@ -283,13 +284,13 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
     jaz_account_details = [f"{{'Account Name': {controlled_account_name} , 'Account Type': {account_type}}}"
                            for controlled_account_name, account_type in
                            zip(jaz_controlled_account_names, jaz_account_types)]
-    ext_coa_account_details=[f"{{'Account Name': {coa_account_name} , 'Account Type': {coa_account_type}}}"
-                             for coa_account_name,coa_account_type in
-                             zip(ext_coa_account_names, ext_coa_account_types)]
-    sga_matches = recommend_sga_match(jaz_account_details,ext_coa_account_details, 10)
-    st.write("sga_op",sga_matches)
+    ext_coa_account_details = [f"{{'Account Name': {coa_account_name} , 'Account Type': {coa_account_type}}}"
+                               for coa_account_name, coa_account_type in
+                               zip(ext_coa_account_names, ext_coa_account_types)]
+    sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_details, 10)
+    st.write("sga_op", sga_matches)
     st.write("jaz_account_details", jaz_account_details)
-    st.write("ext_coa_account_details",ext_coa_account_details)
+    st.write("ext_coa_account_details", ext_coa_account_details)
     st.write("coa_account_names", ext_coa_account_names)
     st.write("coa_account_typees", ext_coa_account_types)
     if len(sga_matches) != len(ext_coa_account_names):
@@ -302,16 +303,18 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
         if validate_sga_match_response(sga_matches[i]) and sga_conflict_map[sga_matches[i]] == 1:
             jaz_coa_controlled_account_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
-            filtered_df = external_coa_df[external_coa_df['*Name'] == ext_coa_name]
+            filtered_df = external_coa_df[external_coa_df['Name'] == ext_coa_name]
             if len(filtered_df) > 0:
                 filtered_row = filtered_df.iloc[0]
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
                             value['Controlled Account (do not edit)'] == jaz_coa_controlled_account_name):
-                        jaz_coa_map[elem]['Name*'] = filtered_row['*Name']
-                        jaz_coa_map[elem]['Account Type*'] = filtered_row['*Type']
-                        jaz_coa_map[elem]['Code'] = filtered_row['*Code']
-                        jaz_coa_map[elem]['Description'] = filtered_row['Description']
+                        jaz_coa_map[elem]['Name*'] = filtered_row['Name']
+                        jaz_coa_map[elem]['Account Type*'] = filtered_row['Type']
+                        if code_flag:
+                            jaz_coa_map[elem]['Code'] = filtered_row['Code']
+                        if desc_flag:
+                            jaz_coa_map[elem]['Description'] = filtered_row['Description']
                         jaz_coa_map[elem]['Match'] = True
                         jaz_coa_map[elem]['Status'] = 'ACTIVE'
                         jaz_coa_map[elem]['Match Type'] = 'GPT'
@@ -322,6 +325,45 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
 def convert_df_to_csv(df):
     csv_df = df.to_csv(index=False, encoding='utf-8')
     return csv_df
+
+
+def contains_substring(substring, text):
+    """
+    This function checks if the given text contains the specified substring.
+
+    Args:
+    text (str): The text to search within.
+    substring (str): The substring to search for.
+
+    Returns:
+    bool: True if the substring is found in the text, False otherwise.
+    """
+    # Escape the substring to handle special regex characters
+    pattern = re.escape(substring)
+
+    # Search for the pattern in the text
+    match = re.search(pattern, text, re.IGNORECASE)  # Adding re.IGNORECASE for case insensitive match
+
+    # Return True if a match is found, otherwise False
+    return bool(match)
+
+
+def update_external_coa_column_names(external_coa_df):
+    external_coa_columns = external_coa_df.columns
+    name_column = None
+    type_column = None
+    code_column = None
+    description_column = None
+    for i in range(len(external_coa_columns)):
+        if contains_substring("Name", external_coa_columns[i]):
+            name_column = external_coa_columns[i]
+        elif contains_substring("Type", external_coa_columns[i]):
+            type_column = external_coa_columns[i]
+        elif contains_substring("Code", external_coa_columns[i]):
+            code_column = external_coa_columns[i]
+        elif contains_substring("Description", external_coa_columns[i]):
+            description_column = external_coa_columns[i]
+    return name_column, type_column, code_column, description_column
 
 
 def run_process():
@@ -361,9 +403,9 @@ def run_process():
         """, unsafe_allow_html=True)
     jaz_coa_file = st.file_uploader("", type=["xlsx"])
     if external_coa_file is not None and jaz_coa_file is not None:
-        external_coa_data = pd.read_csv(external_coa_file)
-        st.write("external cols",external_coa_data.columns)
-        if 'jaz_sga_name' not in external_coa_data.columns:
+        external_coa_df = pd.read_csv(external_coa_file)
+        st.write("external cols", external_coa_df.columns)
+        if 'jaz_sga_name' not in external_coa_df.columns:
             st.error("""
                 Please add a new column “jaz_sga_name” to the external COA file.\t
                 In this column, please enter a value from the list below to map to the correct controlled account.
@@ -381,8 +423,37 @@ def run_process():
                 10. Retained Earnings
                 """)
             st.stop()
-        jaz_coa_data = pd.read_excel(jaz_coa_file, sheet_name=1)
-        jaz_coa_df_columns = jaz_coa_data.columns
+        name_column, type_column, code_column, description_column = update_external_coa_column_names(external_coa_df)
+        if name_column is None and type_column is None:
+            st.error("""
+                Could Not Detect Account Name && Account Type column in the External COA File.
+                Please update the column name and reupload
+                """)
+            st.stop()
+        elif name_column is None:
+            st.error("""
+                Could Not Detect Account Name in the External COA File.
+                Please update the column name and reupload
+                """)
+            st.stop()
+        elif type_column is None:
+            st.error("""
+                Could Not Detect Account Type in the External COA File.
+                Please update the column name and reupload
+                """)
+            st.stop()
+
+        external_coa_df.rename(columns={name_column: 'Name'}, inplace=True)
+        external_coa_df.rename(columns={type_column: 'Type'}, inplace=True)
+        code_flag = code_column is not None
+        desc_flag = description_column is not None
+        if code_flag:
+            external_coa_df.rename(columns={code_column: 'Code'}, inplace=True)
+        if desc_flag:
+            external_coa_df.rename(columns={description_column: 'Description'}, inplace=True)
+
+        jaz_coa_df = pd.read_excel(jaz_coa_file, sheet_name=1)
+        jaz_coa_df_columns = jaz_coa_df.columns
         currency_flag = False
         if 'Currency*' in jaz_coa_df_columns:
             currency_flag = True
@@ -395,12 +466,12 @@ def run_process():
                 if col in COLUMNS_WITHOUT_CURRENCY:
                     column_order.append(col)
 
-        for i in range(len(external_coa_data)):
-            external_coa_data.at[i, '*Type'] = get_account_type_mapping(external_coa_data.iloc[i]['*Type'])
+        for i in range(len(external_coa_df)):
+            external_coa_df.at[i, 'Type'] = get_account_type_mapping(external_coa_df.iloc[i]['Type'])
         jaz_coa_map = defaultdict(dict)
         mapped_external_coa_names = set()
-        for j in range(len(jaz_coa_data)):
-            row = jaz_coa_data.iloc[j]
+        for j in range(len(jaz_coa_df)):
+            row = jaz_coa_df.iloc[j]
             account_name = row['Name*']
             account_type = row['Account Type*']
             code = row['Code']
@@ -422,33 +493,39 @@ def run_process():
             if currency_flag:
                 jaz_coa_map[account_name]['Currency*'] = row['Currency*']
 
-        for i in range(len(external_coa_data)):
-            row = external_coa_data.iloc[i]
+        for i in range(len(external_coa_df)):
+            row = external_coa_df.iloc[i]
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
                 continue
             else:
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
                             value['Controlled Account (do not edit)'] == row['jaz_sga_name']):
-                        jaz_coa_map[elem]['Name*'] = row['*Name']
-                        jaz_coa_map[elem]['Account Type*'] = row['*Type']
-                        jaz_coa_map[elem]['Code'] = row['*Code']
-                        jaz_coa_map[elem]['Description'] = row['Description']
+                        jaz_coa_map[elem]['Name*'] = row['Name']
+                        jaz_coa_map[elem]['Account Type*'] = row['Type']
+                        if code_flag:
+                            jaz_coa_map[elem]['Code'] = row['Code']
+                        if desc_flag:
+                            jaz_coa_map[elem]['Description'] = row['Description']
                         jaz_coa_map[elem]['Match'] = True
                         jaz_coa_map[elem]['Status'] = 'ACTIVE'
                         jaz_coa_map[elem]['Match Type'] = 'SGA NAME'
-                        mapped_external_coa_names.add(row['*Name'])
+                        mapped_external_coa_names.add(row['Name'])
 
-        jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_data, jaz_coa_data, jaz_coa_map,
-                                                                     mapped_external_coa_names)
+        jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map,
+                                                                     mapped_external_coa_names, code_flag, desc_flag)
 
-        for p in range(len(external_coa_data)):
-            row = external_coa_data.iloc[p]
-            if row['*Name'] not in mapped_external_coa_names:
-                account_name = row['*Name']
-                account_type = row['*Type']
-                code = row['*Code']
-                description = row['Description']
+        for p in range(len(external_coa_df)):
+            row = external_coa_df.iloc[p]
+            if row['Name'] not in mapped_external_coa_names:
+                account_name = row['Name']
+                account_type = row['Type']
+                code = ""
+                if code_flag:
+                    code = row['Code']
+                description = ""
+                if desc_flag:
+                    description = row['Description']
                 lock_date = ""
                 unique_id = ""
                 controlled_account = ""
@@ -470,7 +547,7 @@ def run_process():
             if value['Controlled Account (do not edit)'] in ACTIVE_ONLY_ACCOUNTS:
                 jaz_coa_map[key]['Status'] = 'ACTIVE'
 
-        st.write("JCOAFM",jaz_coa_map)
+        st.write("JCOAFM", jaz_coa_map)
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         final_df = final_df[column_order]
         final_output_csv = convert_df_to_csv(final_df)
