@@ -263,7 +263,7 @@ def update_external_coa_column_names(external_coa_df):
             name_column = external_coa_columns[i]
         elif calculate_cosine_similarity("Account Type", external_coa_columns[i]) >= 50:
             type_column = external_coa_columns[i]
-        elif calculate_cosine_similarity("Code", external_coa_columns[i]) >= 70:
+        elif calculate_cosine_similarity("Account Code", external_coa_columns[i]) >= 50:
             code_column = external_coa_columns[i]
         elif calculate_cosine_similarity("Description", external_coa_columns[i]) >= 50:
             description_column = external_coa_columns[i]
