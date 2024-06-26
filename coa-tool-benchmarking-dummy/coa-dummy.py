@@ -380,7 +380,7 @@ def run_process():
     # Compute cosine similarity
     similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
     similarity_score = similarity.item()
-    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
+    st.write(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
 
     phrases = ["Account Code", "Report Code"]
 
@@ -390,7 +390,7 @@ def run_process():
     # Compute cosine similarity
     similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
     similarity_score = similarity.item()
-    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
+    st.write(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
 
     phrases = ["Account Code", "Code"]
 
@@ -400,7 +400,7 @@ def run_process():
     # Compute cosine similarity
     similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
     similarity_score = similarity.item()
-    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
+    st.write(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
 
     phrases = ["Code", "Tax Code"]
 
@@ -410,7 +410,7 @@ def run_process():
     # Compute cosine similarity
     similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
     similarity_score = similarity.item()
-    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
+    st.write(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
     st.markdown(
         """
         <div style="
