@@ -410,7 +410,8 @@ def run_process():
     # Compute cosine similarity
     similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
     similarity_score = similarity.item()
-    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")    st.markdown(
+    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
+    st.markdown(
         """
         <div style="
             display: flex;
