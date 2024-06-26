@@ -411,6 +411,16 @@ def run_process():
     similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
     similarity_score = similarity.item()
     st.write(f"Semantic similarity between 'Code' and 'Tax Code': {similarity_score}")
+
+    phrases = ["Account Code", "Tax Code"]
+
+    # Get embeddings for both words/phrases
+    embeddings = model.encode(phrases)
+
+    # Compute cosine similarity
+    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
+    similarity_score = similarity.item()
+    st.write(f"Semantic similarity between 'Account Code' and 'Tax Code': {similarity_score}")
     st.markdown(
         """
         <div style="
