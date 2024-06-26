@@ -4,3 +4,4 @@ requests
 openpyxl
 fuzzywuzzy
 scikit-learn
+sentence-transformers

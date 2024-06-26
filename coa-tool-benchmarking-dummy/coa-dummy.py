@@ -6,6 +6,7 @@ from collections import defaultdict
 from fuzzywuzzy import fuzz
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer, util
 
 API_KEY = st.secrets["API_KEY"]
 ACTIVE_ONLY_ACCOUNTS = ['Input GST Receivable',
@@ -365,7 +366,51 @@ def update_external_coa_column_names(external_coa_df):
 
 
 def run_process():
-    st.markdown(
+
+
+    # Load pre-trained Sentence-BERT model
+    model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+
+    # Define the words/phrases
+    phrases = ["radio", "police"]
+
+    # Get embeddings for both words/phrases
+    embeddings = model.encode(phrases)
+
+    # Compute cosine similarity
+    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
+    similarity_score = similarity.item()
+    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
+
+    phrases = ["Account Code", "Report Code"]
+
+    # Get embeddings for both words/phrases
+    embeddings = model.encode(phrases)
+
+    # Compute cosine similarity
+    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
+    similarity_score = similarity.item()
+    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
+
+    phrases = ["Account Code", "Code"]
+
+    # Get embeddings for both words/phrases
+    embeddings = model.encode(phrases)
+
+    # Compute cosine similarity
+    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
+    similarity_score = similarity.item()
+    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
+
+    phrases = ["Code", "Tax Code"]
+
+    # Get embeddings for both words/phrases
+    embeddings = model.encode(phrases)
+
+    # Compute cosine similarity
+    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
+    similarity_score = similarity.item()
+    print(f"Semantic similarity between 'radio' and 'police': {similarity_score}")    st.markdown(
         """
         <div style="
             display: flex;
