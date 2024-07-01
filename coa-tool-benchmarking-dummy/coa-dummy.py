@@ -6,7 +6,6 @@ from collections import defaultdict
 from fuzzywuzzy import fuzz
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer, util
 
 API_KEY = st.secrets["API_KEY"]
 ACTIVE_ONLY_ACCOUNTS = ['Input GST Receivable',
@@ -111,94 +110,6 @@ def get_account_type_mapping(external_account_type):
     return f'Not Mapped: {external_account_type}'
 
 
-account_type_prompt = """
-You are a skilled accountant. Determine the closest matching Accepted Account Type for each Account Type or Report Code combination given as input below. 
-If there is no matching type, return an empty value
-
-The accepted account types are:
-1. Asset - Bank Accounts 
-2. Asset - Cash
-3. Asset - Current Asset
-4. Asset - Fixed Asset
-5. Asset - Inventory
-6. Asset - Non-current Asset
-7. Equity - Shareholders Equity
-8. Expense - Direct Costs
-9. Expense - Operating Expense
-10. Expense - Other Expense
-11. Liability - Current Liability
-12. Liability - Non-current Liability
-13. Revenue - Operating Revenue
-14. Revenue - Other Revenue
-
-Only if the account type was not sufficient to determine the correct accepted account type, then use the report code to 
-determine the accepted account type. Here is a help abbreviation glossary that maps to the accepted account types:
-EXP = Expense - Operating Expense
-EQU = Equity - Shareholders Equity
-
-Criteria:
-1) Return only Accepted Account Type from the list above as response. If there is no close match,return ''.
-2) Please do not give them index numbers at all.
-3) Make sure the return list length is exactly the same as the input size length
- (VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-4) Please do not have empty lines in your return. The results should all be in the next line 
-(VERY IMPORTANT PLEASE MAKE SURE FOR EVERY BATCH)
-"""
-
-
-def classify_account_types(account_types, report_codes, batch_size=15):
-    headers = {
-        'Authorization': f'Bearer {API_KEY}',
-        'Content-Type': 'application/json',
-    }
-    results = [None] * len(account_types)
-
-    def process_batch(start_index):
-        end_index = min(start_index + batch_size, len(account_types))
-        account_type_batch = account_types[start_index:end_index]
-        report_code_batch = report_codes[start_index:end_index]
-        messages = [{
-            'role': 'system',
-            'content': account_type_prompt
-        }]
-        for i in range(len(account_type_batch)):
-            messages.append({
-                'role': 'user',
-                'content': f"Account Type: {account_type_batch[i]}  Report Code: {report_code_batch}"
-            })
-
-        data = {
-            "model": "gpt-4-turbo",
-            "messages": messages,
-            "temperature": 0.5,
-            "max_tokens": 1000
-        }
-
-        try:
-            response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
-            response.raise_for_status()
-            response_json = response.json()
-            content = response_json['choices'][0]['message']['content']
-            content = content.strip("```").strip()
-            batch_results = [line.strip() for line in content.split('\n')]
-
-            if len(batch_results) != len(account_type_batch):
-                print("batch: ", account_type_batch)
-                print("batch results: ", batch_results)
-                raise ValueError(f"Expected {len(account_type_batch)} results, but got {len(batch_results)}")
-        except (requests.exceptions.RequestException, ValueError, IndexError) as e:
-            print(f"Error processing batch: {e}")
-            batch_results = ["Error in classification"] * len(account_type_batch)
-
-        results[start_index:end_index] = batch_results
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        indices = range(0, len(account_types), batch_size)
-        executor.map(process_batch, indices)
-
-    return results
-
-
 def sga_prompt_generator(chart_of_accounts):
     sga_prompt = """
     You are a skilled financial analyst.
@@ -267,50 +178,43 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size
     return results
 
 
-def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_names, code_flag, desc_flag):
-    unmapped_external_coa = external_coa_df[~(external_coa_df['Name'].isin(mapped_coa_names))]
-    jaz_controlled_account_names = []
-    jaz_account_types = []
+def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_external_coa_names, code_flag, desc_flag):
+    unmapped_external_coa = external_coa_df[~(external_coa_df['Name'].isin(mapped_external_coa_names))]
+    jaz_input_account_names = []
+    jaz_input_account_types = []
     for i in range(len(jaz_coa_df)):
-        controlled_account_name = jaz_coa_df.iloc[i]['Controlled Account (do not edit)']
         account_name = jaz_coa_df.iloc[i]['Name*']
         account_type = jaz_coa_df.iloc[i]['Account Type*']
-        if (controlled_account_name == "" or controlled_account_name is None
-                or jaz_coa_map[account_name]['Match'] or pd.isna(controlled_account_name)):
+        if (account_name == "" or account_name is None
+                or jaz_coa_map[account_name]['Match'] or pd.isna(account_name)):
             continue
         else:
-            jaz_controlled_account_names.append(controlled_account_name)
-            jaz_account_types.append(account_type)
+            jaz_input_account_names.append(account_name)
+            jaz_input_account_types.append(account_type)
     ext_coa_account_names = unmapped_external_coa['Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['Type'].tolist()
-    jaz_account_details = [f"{{'Account Name': {controlled_account_name} , 'Account Type': {account_type}}}"
-                           for controlled_account_name, account_type in
-                           zip(jaz_controlled_account_names, jaz_account_types)]
+    jaz_account_details = [f"{{'Account Name': {account_name} , 'Account Type': {account_type}}}"
+                           for account_name, account_type in
+                           zip(jaz_input_account_names, jaz_input_account_types)]
     ext_coa_account_details = [f"{{'Account Name': {coa_account_name} , 'Account Type': {coa_account_type}}}"
                                for coa_account_name, coa_account_type in
                                zip(ext_coa_account_names, ext_coa_account_types)]
-    sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_details, 10)
-    st.write("sga_op", sga_matches)
-    st.write("jaz_account_details", jaz_account_details)
-    st.write("ext_coa_account_details", ext_coa_account_details)
-    st.write("coa_account_names", ext_coa_account_names)
-    st.write("coa_account_typees", ext_coa_account_types)
+    sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_details, 15)
     if len(sga_matches) != len(ext_coa_account_names):
-        return jaz_coa_map, mapped_coa_names
+        return jaz_coa_map, mapped_external_coa_names
     sga_conflict_map = defaultdict(int)
     for i in range(len(sga_matches)):
         value = sga_matches[i]
         sga_conflict_map[value] += 1
     for i in range(len(sga_matches)):
         if validate_sga_match_response(sga_matches[i]) and sga_conflict_map[sga_matches[i]] == 1:
-            jaz_coa_controlled_account_name = sga_matches[i]
+            response_account_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             filtered_df = external_coa_df[external_coa_df['Name'] == ext_coa_name]
             if len(filtered_df) > 0:
                 filtered_row = filtered_df.iloc[0]
                 for elem, value in jaz_coa_map.items():
-                    if (value['Controlled Account (do not edit)'] is not None and
-                            value['Controlled Account (do not edit)'] == jaz_coa_controlled_account_name):
+                    if elem == response_account_name:
                         jaz_coa_map[elem]['Name*'] = filtered_row['Name']
                         jaz_coa_map[elem]['Account Type*'] = filtered_row['Type']
                         if code_flag:
@@ -320,8 +224,8 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
                         jaz_coa_map[elem]['Match'] = True
                         jaz_coa_map[elem]['Status'] = 'ACTIVE'
                         jaz_coa_map[elem]['Match Type'] = 'GPT'
-                        mapped_coa_names.add(ext_coa_name)
-    return jaz_coa_map, mapped_coa_names
+                        mapped_external_coa_names.add(ext_coa_name)
+    return jaz_coa_map, mapped_external_coa_names
 
 
 def convert_df_to_csv(df):
@@ -358,7 +262,7 @@ def update_external_coa_column_names(external_coa_df):
             name_column = external_coa_columns[i]
         elif calculate_cosine_similarity("Account Type", external_coa_columns[i]) >= 50:
             type_column = external_coa_columns[i]
-        elif calculate_cosine_similarity("Account Code", external_coa_columns[i]) >= 70:
+        elif calculate_cosine_similarity("Account Code", external_coa_columns[i]) >= 50:
             code_column = external_coa_columns[i]
         elif calculate_cosine_similarity("Description", external_coa_columns[i]) >= 50:
             description_column = external_coa_columns[i]
@@ -366,61 +270,6 @@ def update_external_coa_column_names(external_coa_df):
 
 
 def run_process():
-
-
-    # Load pre-trained Sentence-BERT model
-    model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-
-    # Define the words/phrases
-    phrases = ["radio", "police"]
-
-    # Get embeddings for both words/phrases
-    embeddings = model.encode(phrases)
-
-    # Compute cosine similarity
-    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
-    similarity_score = similarity.item()
-    st.write(f"Semantic similarity between 'radio' and 'police': {similarity_score}")
-
-    phrases = ["Account Code", "Report Code"]
-
-    # Get embeddings for both words/phrases
-    embeddings = model.encode(phrases)
-
-    # Compute cosine similarity
-    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
-    similarity_score = similarity.item()
-    st.write(f"Semantic similarity between 'Account Code' and 'Report Code': {similarity_score}")
-
-    phrases = ["Account Code", "Code"]
-
-    # Get embeddings for both words/phrases
-    embeddings = model.encode(phrases)
-
-    # Compute cosine similarity
-    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
-    similarity_score = similarity.item()
-    st.write(f"Semantic similarity between 'Account Code' and 'Code': {similarity_score}")
-
-    phrases = ["Code", "Tax Code"]
-
-    # Get embeddings for both words/phrases
-    embeddings = model.encode(phrases)
-
-    # Compute cosine similarity
-    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
-    similarity_score = similarity.item()
-    st.write(f"Semantic similarity between 'Code' and 'Tax Code': {similarity_score}")
-
-    phrases = ["Account Code", "Tax Code"]
-
-    # Get embeddings for both words/phrases
-    embeddings = model.encode(phrases)
-
-    # Compute cosine similarity
-    similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
-    similarity_score = similarity.item()
-    st.write(f"Semantic similarity between 'Account Code' and 'Tax Code': {similarity_score}")
     st.markdown(
         """
         <div style="
@@ -440,7 +289,6 @@ def run_process():
     )
 
     guideline_block = """
-            <h5 style="text-align: center;">Guidelines:</h5>
             <h5 style="margin-bottom: 0; margin-top: 0;">Steps:</h5>            
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">1. The COA external_file should have the full list of accounts you want for the organization </p>
             <p style="margin: 2px 0;font-size: 16px; white-space: nowrap;">2. The external_file must have the following columns: <strong>jaz_controlled_account
@@ -467,7 +315,6 @@ def run_process():
                 <h1 style='font-size: 20px; font-weight: bold;'>Please upload External COA File</h1>
             </div>
         """, unsafe_allow_html=True)
-    st.write("")
     external_coa_file = st.file_uploader("", type=["csv"])
     st.write("")
     st.write("")
@@ -502,21 +349,21 @@ def run_process():
         name_column, type_column, code_column, description_column = update_external_coa_column_names(external_coa_df)
         if name_column is None and type_column is None:
             st.error("""
-            Unable to detect the  Account Name  and  Account Type  column in the External COA file.\t 
-            Please update the column name to 'Name' and 'Type' respectively and re-upload the file.
-                """)
+                Unable to detect the  Account Name  and  Account Type  column in the External COA file.\t 
+                Please update the column name to 'Name' and 'Type' respectively and re-upload the file.
+                    """)
             st.stop()
         elif name_column is None:
             st.error("""
-            Unable to detect the  Account Name  column in the External COA file.\t
-            Please update the column name to 'Name' and re-upload the file.
-            """)
+                Unable to detect the  Account Name  column in the External COA file.\t
+                Please update the column name to 'Name' and re-upload the file.
+                """)
             st.stop()
         elif type_column is None:
             st.error("""
-            Unable to detect the  Account Type  column in the External COA file.\t
-            Please update the column name to 'Type' and re-upload the file.
-                """)
+                Unable to detect the  Account Type  column in the External COA file.\t
+                Please update the column name to 'Type' and re-upload the file.
+                    """)
             st.stop()
 
         external_coa_df.rename(columns={name_column: 'Name'}, inplace=True)
@@ -606,6 +453,9 @@ def run_process():
                 lock_date = ""
                 unique_id = ""
                 controlled_account = ""
+                if account_name in jaz_coa_map:
+                    unique_id = jaz_coa_map[account_name]["Unique ID (do not edit)"]
+                    account_type = jaz_coa_map[account_name]["Account Type*"]
                 jaz_coa_map[account_name] = {
                     "Account Type*": account_type,
                     "Name*": account_name,
