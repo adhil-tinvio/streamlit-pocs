@@ -178,45 +178,43 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size
     return results
 
 
-def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_names, code_flag, desc_flag):
-    unmapped_external_coa = external_coa_df[~(external_coa_df['Name'].isin(mapped_coa_names))]
-    jaz_controlled_account_names = []
-    jaz_account_types = []
+def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_external_coa_names, code_flag, desc_flag):
+    unmapped_external_coa = external_coa_df[~(external_coa_df['Name'].isin(mapped_external_coa_names))]
+    jaz_input_account_names = []
+    jaz_input_account_types = []
     for i in range(len(jaz_coa_df)):
-        controlled_account_name = jaz_coa_df.iloc[i]['Controlled Account (do not edit)']
         account_name = jaz_coa_df.iloc[i]['Name*']
         account_type = jaz_coa_df.iloc[i]['Account Type*']
-        if (controlled_account_name == "" or controlled_account_name is None
-                or jaz_coa_map[account_name]['Match'] or pd.isna(controlled_account_name)):
+        if (account_name == "" or account_name is None
+                or jaz_coa_map[account_name]['Match'] or pd.isna(account_name)):
             continue
         else:
-            jaz_controlled_account_names.append(controlled_account_name)
-            jaz_account_types.append(account_type)
+            jaz_input_account_names.append(account_name)
+            jaz_input_account_types.append(account_type)
     ext_coa_account_names = unmapped_external_coa['Name'].tolist()
     ext_coa_account_types = unmapped_external_coa['Type'].tolist()
     jaz_account_details = [f"{{'Account Name': {controlled_account_name} , 'Account Type': {account_type}}}"
                            for controlled_account_name, account_type in
-                           zip(jaz_controlled_account_names, jaz_account_types)]
+                           zip(jaz_input_account_names, jaz_input_account_types)]
     ext_coa_account_details = [f"{{'Account Name': {coa_account_name} , 'Account Type': {coa_account_type}}}"
                                for coa_account_name, coa_account_type in
                                zip(ext_coa_account_names, ext_coa_account_types)]
     sga_matches = recommend_sga_match(jaz_account_details, ext_coa_account_details, 15)
     if len(sga_matches) != len(ext_coa_account_names):
-        return jaz_coa_map, mapped_coa_names
+        return jaz_coa_map, mapped_external_coa_names
     sga_conflict_map = defaultdict(int)
     for i in range(len(sga_matches)):
         value = sga_matches[i]
         sga_conflict_map[value] += 1
     for i in range(len(sga_matches)):
         if validate_sga_match_response(sga_matches[i]) and sga_conflict_map[sga_matches[i]] == 1:
-            jaz_coa_controlled_account_name = sga_matches[i]
+            response_account_name = sga_matches[i]
             ext_coa_name = ext_coa_account_names[i]
             filtered_df = external_coa_df[external_coa_df['Name'] == ext_coa_name]
             if len(filtered_df) > 0:
                 filtered_row = filtered_df.iloc[0]
                 for elem, value in jaz_coa_map.items():
-                    if (value['Controlled Account (do not edit)'] is not None and
-                            value['Controlled Account (do not edit)'] == jaz_coa_controlled_account_name):
+                    if elem == response_account_name:
                         jaz_coa_map[elem]['Name*'] = filtered_row['Name']
                         jaz_coa_map[elem]['Account Type*'] = filtered_row['Type']
                         if code_flag:
@@ -226,8 +224,8 @@ def match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map, mapped_coa_nam
                         jaz_coa_map[elem]['Match'] = True
                         jaz_coa_map[elem]['Status'] = 'ACTIVE'
                         jaz_coa_map[elem]['Match Type'] = 'GPT'
-                        mapped_coa_names.add(ext_coa_name)
-    return jaz_coa_map, mapped_coa_names
+                        mapped_external_coa_names.add(ext_coa_name)
+    return jaz_coa_map, mapped_external_coa_names
 
 
 def convert_df_to_csv(df):
