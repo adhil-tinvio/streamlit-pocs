@@ -234,6 +234,7 @@ def convert_df_to_csv(df):
     csv_df = df.to_csv(index=False, encoding='utf-8')
     return csv_df
 
+
 def calculate_cosine_similarity(text1, text2):
     # Example documents
     documents = [text1, text2]
@@ -245,7 +246,7 @@ def calculate_cosine_similarity(text1, text2):
     tfidf_matrix = vectorizer.fit_transform(documents)
 
     # Compute cosine similarity between the two TF-IDF vectors
-    similarity = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1])[0][0]*100
+    similarity = cosine_similarity(tfidf_matrix[0], tfidf_matrix[1])[0][0] * 100
 
     return similarity
 
@@ -438,7 +439,7 @@ def run_process():
                         mapped_external_coa_names.add(row['Name'])
 
         jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map,
-                                                                     mapped_external_coa_names,code_flag,desc_flag)
+                                                                     mapped_external_coa_names, code_flag, desc_flag)
 
         for p in range(len(external_coa_df)):
             row = external_coa_df.iloc[p]
@@ -454,6 +455,9 @@ def run_process():
                 lock_date = ""
                 unique_id = ""
                 controlled_account = ""
+                if account_name in jaz_coa_map:
+                    unique_id = jaz_coa_map[account_name]["Unique ID (do not edit)"]
+                    account_type = jaz_coa_map[account_name]["Account Type*"]
                 jaz_coa_map[account_name] = {
                     "Account Type*": account_type,
                     "Name*": account_name,
