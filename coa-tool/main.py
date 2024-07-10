@@ -149,7 +149,7 @@ def recommend_sga_match(jaz_account_details, ext_coa_account_details, batch_size
         data = {
             "model": "gpt-4o",
             "messages": messages,
-            "temperature": 0.1,
+            "temperature": 0,
             "max_tokens": 1000
         }
 
