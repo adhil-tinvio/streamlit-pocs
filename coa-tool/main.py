@@ -107,7 +107,7 @@ def get_account_type_mapping(external_account_type):
         if fuzz.ratio(key, external_account_type) > 95:
             return value
 
-    return f'Not Mapped: {external_account_type}'
+    return f'!!!REVIEW!!! Not Mapped: {external_account_type}'
 
 
 def sga_prompt_generator(chart_of_accounts):
