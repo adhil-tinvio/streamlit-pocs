@@ -402,7 +402,10 @@ def run_process():
             description = row['Description']
             lock_date = row['Lock Date']
             unique_id = row['Unique ID (do not edit)']
+            status = "DELETE"
             controlled_account = row['Controlled Account (do not edit)']
+            if controlled_account in ACTIVE_ONLY_ACCOUNTS:
+                status = "ACTIVE"
             jaz_coa_map[account_name] = {
                 "Account Type*": account_type,
                 "Name*": account_name,
@@ -411,7 +414,7 @@ def run_process():
                 "Lock Date": lock_date,
                 "Unique ID (do not edit)": unique_id,
                 "Match": False,
-                "Status": "DELETE",
+                "Status": status,
                 "Controlled Account (do not edit)": controlled_account
             }
             if currency_flag:
@@ -453,26 +456,41 @@ def run_process():
                 lock_date = ""
                 unique_id = ""
                 controlled_account = ""
-                if account_name in jaz_coa_map:
-                    unique_id = jaz_coa_map[account_name]["Unique ID (do not edit)"]
-                    account_type = jaz_coa_map[account_name]["Account Type*"]
-                jaz_coa_map[account_name] = {
-                    "Account Type*": account_type,
-                    "Name*": account_name,
-                    "Code": code,
-                    "Description": description,
-                    "Lock Date": lock_date,
-                    "Unique ID (do not edit)": unique_id,
-                    "Match": False,
-                    "Status": "ACTIVE",
-                    "Controlled Account (do not edit)": controlled_account
-                }
-                if currency_flag:
-                    jaz_coa_map[account_name]['Currency*'] = ""
+                updated_bool = False
 
-        for key, value in jaz_coa_map.items():
-            if value['Controlled Account (do not edit)'] in ACTIVE_ONLY_ACCOUNTS:
-                jaz_coa_map[key]['Status'] = 'ACTIVE'
+                for acc_name, value in jaz_coa_map.items():
+                    if fuzz.ratio(acc_name, account_name) > 95 and not updated_bool and value["Status"] == "DELETE":
+                        updated_bool = True
+                        unique_id = jaz_coa_map[acc_name]["Unique ID (do not edit)"]
+                        account_type = jaz_coa_map[acc_name]["Account Type*"]
+                        jaz_coa_map[acc_name] = {
+                            "Account Type*": account_type,
+                            "Name*": account_name,
+                            "Code": code,
+                            "Description": description,
+                            "Lock Date": lock_date,
+                            "Unique ID (do not edit)": unique_id,
+                            "Match": False,
+                            "Status": "ACTIVE",
+                            "Controlled Account (do not edit)": controlled_account
+                        }
+                        if currency_flag:
+                            jaz_coa_map[account_name]['Currency*'] = ""
+
+                if not updated_bool:
+                    jaz_coa_map[account_name] = {
+                        "Account Type*": account_type,
+                        "Name*": account_name,
+                        "Code": code,
+                        "Description": description,
+                        "Lock Date": lock_date,
+                        "Unique ID (do not edit)": unique_id,
+                        "Match": False,
+                        "Status": "ACTIVE",
+                        "Controlled Account (do not edit)": controlled_account
+                    }
+                    if currency_flag:
+                        jaz_coa_map[account_name]['Currency*'] = ""
 
         final_df = pd.DataFrame.from_dict(jaz_coa_map, orient='index')
         final_df = final_df[column_order]
