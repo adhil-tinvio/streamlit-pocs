@@ -19,7 +19,6 @@ ACTIVE_ONLY_ACCOUNTS = ['Input GST Receivable',
                         'FX Unrealized Currency (Gains)/Losses',
                         'FX Bank Revaluation (Gains)/Losses',
                         'FX Rounding (Gains)/Losses',
-                        'Business Bank Account',
                         'Accounts Receivable',
                         'Retained Earnings',
                         'Input VAT Receivable',
@@ -336,14 +335,13 @@ def run_process():
                 **Controlled Accounts**:
                 1. Accounts Payable
                 2. Accounts Receivable
-                3. Business Bank Account
-                4. FX Bank Revaluation (Gains)/Loss
-                5. FX Realized Currency (Gains)/Loss
-                6. FX Rounding (Gains)/Loss
-                7. FX Unrealized Currency (Gains)/Loss
-                8. Input GST Receivable
-                9. Output VAT Payable
-                10. Retained Earnings
+                3. FX Bank Revaluation (Gains)/Loss
+                4. FX Realized Currency (Gains)/Loss
+                5. FX Rounding (Gains)/Loss
+                6. FX Unrealized Currency (Gains)/Loss
+                7. Input GST Receivable
+                8. Output VAT Payable
+                9. Retained Earnings
                 """)
             st.stop()
         name_column, type_column, code_column, description_column = update_external_coa_column_names(external_coa_df)
