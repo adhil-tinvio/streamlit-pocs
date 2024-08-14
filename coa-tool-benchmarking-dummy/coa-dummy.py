@@ -269,7 +269,7 @@ def update_external_coa_column_names(external_coa_df):
 
 
 def check_controlled_account_mapping(jaz_name, external_name):
-    if jaz_name == 'nan' or jaz_name == '':
+    if pd.isna(jaz_name) or jaz_name == '':
         return False
     st.write("JZ", jaz_name, external_name)
     jaz_name = jaz_name.lower()
