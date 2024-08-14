@@ -338,7 +338,7 @@ def run_process():
                 4. FX Realized Currency (Gains)/Loss
                 5. FX Rounding (Gains)/Loss
                 6. FX Unrealized Currency (Gains)/Loss
-                7. Input GST Receivable
+                7. Input VAT Receivable
                 8. Output VAT Payable
                 9. Retained Earnings
                 """)

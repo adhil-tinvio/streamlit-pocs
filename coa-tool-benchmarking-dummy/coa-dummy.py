@@ -325,6 +325,7 @@ def run_process():
     jaz_coa_file = st.file_uploader("", type=["xlsx"])
     if external_coa_file is not None and jaz_coa_file is not None:
         external_coa_df = pd.read_csv(external_coa_file)
+        external_coa_df.columns = external_coa_df.columns.str.lower()
         if 'jaz_controlled_account' in external_coa_df.columns:
             external_coa_df.rename(columns={'jaz_controlled_account': 'jaz_sga_name'}, inplace=True)
         if 'jaz_sga_name' not in external_coa_df.columns:
@@ -339,7 +340,7 @@ def run_process():
                 4. FX Realized Currency (Gains)/Loss
                 5. FX Rounding (Gains)/Loss
                 6. FX Unrealized Currency (Gains)/Loss
-                7. Input GST Receivable
+                7. Input VAT Receivable
                 8. Output VAT Payable
                 9. Retained Earnings
                 """)
