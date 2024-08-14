@@ -269,6 +269,8 @@ def update_external_coa_column_names(external_coa_df):
 
 
 def check_controlled_account_mapping(jaz_name, external_name):
+    if jaz_name == 'nan' or jaz_name == '':
+        return False
     st.write("JZ", jaz_name, external_name)
     jaz_name = jaz_name.lower()
     external_name = external_name.lower()
@@ -434,7 +436,8 @@ def run_process():
             else:
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
-                            check_controlled_account_mapping(value['Controlled Account (do not edit)'],row['jaz_sga_name'])==True):
+                            check_controlled_account_mapping(value['Controlled Account (do not edit)'],
+                                                             row['jaz_sga_name']) == True):
                         jaz_coa_map[elem]['Name*'] = row['Name']
                         jaz_coa_map[elem]['Account Type*'] = row['Type']
                         if code_flag:
