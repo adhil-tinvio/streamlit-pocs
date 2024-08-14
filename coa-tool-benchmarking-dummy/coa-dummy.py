@@ -268,6 +268,13 @@ def update_external_coa_column_names(external_coa_df):
     return name_column, type_column, code_column, description_column
 
 
+def check_controlled_account_mapping(jaz_name, external_name):
+    jaz_name = jaz_name.lower()
+    external_name = external_name.lower()
+
+    return fuzz.ratio(jaz_name, external_name) > 95
+
+
 def run_process():
     st.markdown(
         """
@@ -426,7 +433,7 @@ def run_process():
             else:
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
-                            value['Controlled Account (do not edit)'] == row['jaz_sga_name']):
+                            check_controlled_account_mapping(value['Controlled Account (do not edit)'],row['jaz_sga_name'])==True):
                         jaz_coa_map[elem]['Name*'] = row['Name']
                         jaz_coa_map[elem]['Account Type*'] = row['Type']
                         if code_flag:
