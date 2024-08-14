@@ -269,7 +269,7 @@ def update_external_coa_column_names(external_coa_df):
 
 
 def check_controlled_account_mapping(jaz_name, external_name):
-    print("JZ", jaz_name, external_name)
+    st.write("JZ", jaz_name, external_name)
     jaz_name = jaz_name.lower()
     external_name = external_name.lower()
 
