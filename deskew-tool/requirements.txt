@@ -1,5 +1,4 @@
 numpy
 gitz
-cv2
 io
 opencv-python
