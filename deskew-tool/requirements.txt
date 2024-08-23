@@ -1,4 +1,0 @@
-numpy
-gitz
-streamlit
-opencv-python
