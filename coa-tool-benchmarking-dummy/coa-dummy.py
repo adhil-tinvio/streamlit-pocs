@@ -448,7 +448,7 @@ def run_process():
                         jaz_coa_map[elem]['Status'] = 'ACTIVE'
                         jaz_coa_map[elem]['Match Type'] = 'SGA NAME'
                         mapped_external_coa_names.add(row['Name'])
-                        break
+                        #break
 
         #jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map,
         #                                                             mapped_external_coa_names, code_flag, desc_flag)
