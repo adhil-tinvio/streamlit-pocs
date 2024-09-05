@@ -430,15 +430,13 @@ def run_process():
         visited_coa_elem=[]
         for i in range(len(external_coa_df)):
             row = external_coa_df.iloc[i]
-            is_row_already_matched = False
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
                 continue
             else:
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
                             check_controlled_account_mapping(value['Controlled Account (do not edit)'],
-                                                             row['jaz_sga_name']) == True and not is_row_already_matched):
-                        is_row_already_matched = True
+                                                             row['jaz_sga_name']) == True):
                         jaz_coa_map[elem]['Name*'] = row['Name']
                         jaz_coa_map[elem]['Account Type*'] = row['Type']
                         if code_flag:
