@@ -274,7 +274,7 @@ def check_controlled_account_mapping(jaz_name, external_name):
     jaz_name = jaz_name.lower()
     external_name = external_name.lower()
 
-    return fuzz.ratio(jaz_name, external_name) > 95
+    return fuzz.ratio(jaz_name, external_name) > 97
 
 
 def run_process():
@@ -432,12 +432,10 @@ def run_process():
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
                 continue
             else:
-                is_matched=False
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
                             check_controlled_account_mapping(value['Controlled Account (do not edit)'],
-                                                             row['jaz_sga_name']) == True and (is_matched==False)):
-                        is_matched = True
+                                                             row['jaz_sga_name']) == True):
                         jaz_coa_map[elem]['Name*'] = row['Name']
                         jaz_coa_map[elem]['Account Type*'] = row['Type']
                         if code_flag:
