@@ -274,7 +274,7 @@ def check_controlled_account_mapping(jaz_name, external_name):
     jaz_name = jaz_name.lower()
     external_name = external_name.lower()
 
-    return fuzz.ratio(jaz_name, external_name) > 95
+    return fuzz.ratio(jaz_name, external_name) > 97
 
 
 def run_process():
