@@ -274,7 +274,7 @@ def check_controlled_account_mapping(jaz_name, external_name):
     jaz_name = jaz_name.lower()
     external_name = external_name.lower()
 
-    return fuzz.ratio(jaz_name, external_name) > 95
+    return fuzz.ratio(jaz_name, external_name) > 97
 
 
 def run_process():
@@ -427,6 +427,7 @@ def run_process():
             if currency_flag:
                 jaz_coa_map[account_name]['Currency*'] = row['Currency*']
 
+        visited_jaz_coa_map_elems=[]
         for i in range(len(external_coa_df)):
             row = external_coa_df.iloc[i]
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
@@ -435,7 +436,8 @@ def run_process():
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
                             check_controlled_account_mapping(value['Controlled Account (do not edit)'],
-                                                             row['jaz_sga_name']) == True):
+                                                             row['jaz_sga_name']) == True and elem not in visited_jaz_coa_map_elems):
+                        visited_jaz_coa_map_elems.append(elem)
                         jaz_coa_map[elem]['Name*'] = row['Name']
                         jaz_coa_map[elem]['Account Type*'] = row['Type']
                         if code_flag:
@@ -446,6 +448,7 @@ def run_process():
                         jaz_coa_map[elem]['Status'] = 'ACTIVE'
                         jaz_coa_map[elem]['Match Type'] = 'SGA NAME'
                         mapped_external_coa_names.add(row['Name'])
+                        break
 
         #jaz_coa_map, mapped_external_coa_names = match_coa_using_gpt(external_coa_df, jaz_coa_df, jaz_coa_map,
         #                                                             mapped_external_coa_names, code_flag, desc_flag)
