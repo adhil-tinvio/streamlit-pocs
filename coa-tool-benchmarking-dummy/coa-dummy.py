@@ -427,6 +427,7 @@ def run_process():
             if currency_flag:
                 jaz_coa_map[account_name]['Currency*'] = row['Currency*']
 
+        visited_coa_elem=[]
         for i in range(len(external_coa_df)):
             row = external_coa_df.iloc[i]
             if row['jaz_sga_name'] == '' or pd.isnull(row['jaz_sga_name']):
@@ -435,7 +436,8 @@ def run_process():
                 for elem, value in jaz_coa_map.items():
                     if (value['Controlled Account (do not edit)'] is not None and
                             check_controlled_account_mapping(value['Controlled Account (do not edit)'],
-                                                             row['jaz_sga_name']) == True):
+                                                             row['jaz_sga_name']) == True and elem not in visited_coa_elem):
+                        visited_coa_elem.append(elem)
                         jaz_coa_map[elem]['Name*'] = row['Name']
                         jaz_coa_map[elem]['Account Type*'] = row['Type']
                         if code_flag:
