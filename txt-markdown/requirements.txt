@@ -1,0 +1,8 @@
+streamlit
+pandas
+requests
+openpyxl
+fuzzywuzzy
+scikit-learn
+sentence-transformers
+html2text
