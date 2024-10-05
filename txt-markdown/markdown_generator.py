@@ -5,19 +5,20 @@ from bs4 import BeautifulSoup
 import html2text
 import streamlit as st
 
+
 def extract_qa_markdown(json_data):
     """
-    Extracts questions and answers from JSON data and formats them in Markdown.
+    Extracts questions, answers, and URLs from JSON data and formats them in Markdown.
 
     Args:
         json_data (dict): The JSON data containing articles.
 
     Returns:
-        str: The extracted Q&A in Markdown format.
+        str: The extracted Q&A with URLs in Markdown format.
     """
     markdown_output = ""
     h = html2text.HTML2Text()
-    h.ignore_images = True
+    h.ignore_images = False  # Set to False to include images
     h.ignore_links = False
     h.bypass_tables = False
     h.ignore_emphasis = False
@@ -26,7 +27,12 @@ def extract_qa_markdown(json_data):
 
     for article in json_data.get('data', []):
         title = article.get('title', 'No Title')
+        url = article.get('url', '')
         markdown_output += f"## {title}\n\n"
+
+        if url:
+            # Add the URL as a clickable link
+            markdown_output += f"[View Article]({url})\n\n"
 
         body = article.get('body', '')
         soup = BeautifulSoup(body, 'html.parser')
@@ -55,9 +61,11 @@ def extract_qa_markdown(json_data):
                     # Convert <p> to Markdown paragraph
                     para_markdown = h.handle(str(sibling))
                     answer_markdown += para_markdown + "\n"
-                elif sibling.name in ['div', 'img']:
-                    # Optionally handle images or other divs if needed
-                    pass  # Currently ignoring images
+                elif sibling.name == 'img':
+                    # Convert <img> to Markdown image
+                    img_url = sibling.get('src', '')
+                    if img_url:
+                        answer_markdown += f"![Image]({img_url})\n\n"
                 # Move to the next sibling
                 sibling = sibling.find_next_sibling()
 
@@ -66,7 +74,6 @@ def extract_qa_markdown(json_data):
         markdown_output += "\n---\n\n"  # Separator between articles
 
     return markdown_output
-
 
 def main():
     st.title("Extract Q&A from JSON to Markdown")
